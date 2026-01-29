@@ -1,0 +1,6 @@
+export const OTP_CONFIG = {
+    MAX_ATTEMPTS: 5,
+    COOLDOWN_MINUTES: 3,
+    BLOCK_HOURS: 1,
+    EXPIRES_MINUTES: 10
+  };
