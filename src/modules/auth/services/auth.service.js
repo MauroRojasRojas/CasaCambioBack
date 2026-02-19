@@ -6,6 +6,7 @@ import { authRepository } from "../repository/auth.repository.js";
 import { AppError } from "../../../core/errors/app-error.js";
 import { verifyPassword, hashPassword } from "../../../core/utils/hash.util.js";
 import { sendOtpEmail } from "../../../core/mail/mail.service.js"
+import pool from "../../../keys.js";
 
 export async function loginService({ correo, password }) {
   // Buscar usuario por correo
@@ -54,12 +55,27 @@ export async function loginService({ correo, password }) {
     modulos = await authRepository.getModulosPermitidos(rol.idRol);
   }
 
+  // Buscar persona asociada
+  const [naturalRows] = await pool.execute('SELECT id, codigo FROM personas_naturales WHERE correo = ? LIMIT 1', [user.correo]);
+  const [juridicaRows] = await pool.execute('SELECT id, codigo FROM personas_juridicas WHERE correo = ? LIMIT 1', [user.correo]);
+
+  let rolCodigoFinal = rol.codigoSistema;
+  let perfilCompletoFinal = user.perfilCompleto;
+
+  if (naturalRows.length > 0) {
+    rolCodigoFinal = "USER_NATURAL";
+    perfilCompletoFinal = naturalRows[0].codigo;
+  } else if (juridicaRows.length > 0) {
+    rolCodigoFinal = "USER_JURIDICA";
+    perfilCompletoFinal = juridicaRows[0].codigo;
+  }
+
   // Generar token
   const token = jwt.sign(
     {
       idUsuario: user.idUsuario,
       correo: user.correo,
-      rol: rol.codigoSistema,
+      rol: rolCodigoFinal,
       //rol: user.idRol
     },
     process.env.KEY_JWT,
@@ -84,9 +100,10 @@ export async function loginService({ correo, password }) {
       correo: user.correo,
       telefono: user.telefono,
       rolNombre: rol.nombre,
-      rolCodigo: rol.codigoSistema,
-      perfilCompleto: user.perfilCompleto,
-      creadoEn: user.creadoEn
+      rolCodigo: rolCodigoFinal,
+      perfilCompleto: perfilCompletoFinal,
+      creadoEn: user.creadoEn,
+      fullName: `${user.nombres} ${user.apellidos}`.trim()
     },
     modulos,
     token,
@@ -416,6 +433,22 @@ export async function completeProfileService({ correo, nombres, apellidos, telef
     telefono
   });
 
+  // Buscar persona y actualizar perfilCompleto
+  const [naturalRows] = await pool.execute('SELECT id, codigo FROM personas_naturales WHERE correo = ? LIMIT 1', [correo]);
+  const [juridicaRows] = await pool.execute('SELECT id, codigo FROM personas_juridicas WHERE correo = ? LIMIT 1', [correo]);
+
+  let perfilCompletoId = 0;
+  let rolFinal = rol.codigoSistema;
+  if (naturalRows.length > 0) {
+    perfilCompletoId = naturalRows[0].codigo;
+    rolFinal = "USER_NATURAL";
+  } else if (juridicaRows.length > 0) {
+    perfilCompletoId = juridicaRows[0].codigo;
+    rolFinal = "USER_JURIDICA";
+  }
+
+  await pool.execute('UPDATE usuarios SET perfilCompleto = ? WHERE idUsuario = ?', [perfilCompletoId, user.idUsuario]);
+
   const refreshToken = crypto.randomBytes(64).toString("hex");
   
       await authRepository.saveRefreshToken({
@@ -429,7 +462,7 @@ export async function completeProfileService({ correo, nombres, apellidos, telef
     {
       idUsuario: user.idUsuario,
       correo: user.correo,
-      rol: rol.codigoSistema
+      rol: rolFinal
     },
     process.env.KEY_JWT,
     { expiresIn: "8h" }
@@ -447,7 +480,8 @@ export async function completeProfileService({ correo, nombres, apellidos, telef
       correo: user.correo,
       telefono,
       creadoEn: user.creadoEn,
-      perfilCompleto: 1
+      perfilCompleto: perfilCompletoId,
+      fullName: `${nombres} ${apellidos}`.trim()
     }
   };
 }

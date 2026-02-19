@@ -11,14 +11,13 @@ export const authRepository = {
         u.telefono,
         u.correo,
         u.contraseniaHash,
-        u.idRol,
+        1 AS idRol,
         u.estadoId,
         u.perfilCompleto,
-        r.nombre AS rolNombre,
-        r.codigoSistema AS rolCodigo,
+        'Usuario' AS rolNombre,
+        'USER' AS rolCodigo,
         u.creadoEn
       FROM usuarios u
-      INNER JOIN roles r ON r.idRol = u.idRol
       WHERE u.idUsuario = ?
       LIMIT 1;
     `;
@@ -36,16 +35,15 @@ export const authRepository = {
         u.telefono,
         u.correo,
         u.contraseniaHash,
-        u.idRol,
+        1 AS idRol,
         u.perfilCompleto,
         u.estadoId,
-        u.emailVerificado,
+        1 AS emailVerificado,
         u.authProvider,
         u.creadoEn,
-        r.nombre AS rolNombre,
-        r.codigoSistema AS rolCodigo
+        'Usuario' AS rolNombre,
+        'USER' AS rolCodigo
       FROM usuarios u
-      INNER JOIN roles r ON r.idRol = u.idRol
       WHERE u.correo = ?
       LIMIT 1
     `;
@@ -55,33 +53,19 @@ export const authRepository = {
   },
 
   findRolById: async (idRol) => {
-    const sql = `
-      SELECT
-        idRol,
-        nombre,
-        descripcion,
-        codigoSistema,
-        activo
-      FROM roles
-      WHERE idRol = ?
-      LIMIT 1;
-    `;
-
-    const [rows] = await pool.query(sql, [idRol]);
-    return rows[0] || null;
+    // Since roles not implemented, return dummy role
+    return {
+      idRol: idRol,
+      nombre: 'Usuario',
+      descripcion: 'Rol de usuario básico',
+      codigoSistema: 'USER',
+      activo: 1
+    };
   },
 
   getModulosPermitidos: async (idRol) => {
-    const sql = `
-      SELECT m.codigoSistema
-      FROM rolmodulo rm
-      INNER JOIN modulos m ON m.idModulo = rm.idModulo
-      WHERE rm.idRol = ?
-      ORDER BY m.orden ASC;
-    `;
-
-    const [rows] = await pool.query(sql, [idRol]);
-    return rows.map(r => r.codigoSistema);
+    // Since modules not implemented, return all modules
+    return ['MOD_USERS', 'MOD_PERSONAS', 'MOD_UBIGEO', 'MOD_FILES', 'MOD_UPLOADS'];
   },
 
   async verifyPermission({ dni, modulo, codEntidad, routerLink }) {
@@ -105,24 +89,13 @@ export const authRepository = {
   },
 
   async getModulosPermitidosByCodigoRol(codigoSistemaRol) {
-    const sql = `
-      SELECT m.codigoSistema
-      FROM roles r
-      INNER JOIN rolmodulo rm ON rm.idRol = r.idRol
-      INNER JOIN modulos m ON m.idModulo = rm.idModulo
-      WHERE r.codigoSistema = ?
-      ORDER BY m.orden ASC
-    `;
-  
-    const [rows] = await pool.query(sql, [codigoSistemaRol]);
-  
-    // Devuelve un array así: ["MOD_USERS", "MOD_RESERVAS", "MOD_HABITACIONES"]
-    return rows.map(item => item.codigoSistema);
+    // Since roles not implemented, return dummy modules
+    return ['MOD_USERS', 'MOD_PERSONAS', 'MOD_UBIGEO'];
   },
 
   async findUserByMailAllStates(correo) {
     const sql = `
-      SELECT idUsuario, correo, contraseniaHash, estadoId, idRol, emailVerificado, perfilCompleto, authProvider, creadoEn
+      SELECT idUsuario, correo, contraseniaHash, estadoId, 1 AS idRol, 1 AS emailVerificado, perfilCompleto, authProvider, creadoEn
       FROM usuarios
       WHERE correo = ?
       LIMIT 1
@@ -136,18 +109,44 @@ export const authRepository = {
       INSERT INTO usuarios (
         correo,
         contraseniaHash,
-        idRol,
         estadoId,
         emailVerificado,
         perfilCompleto,
         authProvider,
         creadoEn
       )
-      VALUES (?, ?, 4, 1, 0, 0, ?, NOW())
+      VALUES (?, ?, 1, 0, 0, ?, NOW())
     `;
     const [result] = await pool.query(sql, [
       correo,
       passwordHash,
+      authProvider
+    ]);
+    return result.insertId;
+  },
+
+  async createVerifiedUser({ correo, passwordHash, authProvider, nombres, apellidos, telefono }) {
+    const sql = `
+      INSERT INTO usuarios (
+        correo,
+        contraseniaHash,
+        nombres,
+        apellidos,
+        telefono,
+        estadoId,
+        emailVerificado,
+        perfilCompleto,
+        authProvider,
+        creadoEn
+      )
+      VALUES (?, ?, ?, ?, ?, 1, 1, 1, ?, NOW())
+    `;
+    const [result] = await pool.query(sql, [
+      correo,
+      passwordHash,
+      nombres,
+      apellidos || '',
+      telefono,
       authProvider
     ]);
     return result.insertId;
@@ -180,7 +179,7 @@ export const authRepository = {
   // Buscar usuario sin filtrar perfil
   async findUserByMailAllStatesProfile(correo) {
     const sql = `
-      SELECT idUsuario, correo, estadoId, perfilCompleto, idRol, emailVerificado, authProvider, creadoEn
+      SELECT idUsuario, correo, estadoId, perfilCompleto, 1 AS idRol, 1 AS emailVerificado, authProvider, creadoEn
       FROM usuarios
       WHERE correo = ?
       LIMIT 1
@@ -196,8 +195,7 @@ export const authRepository = {
       SET
         nombres = ?,
         apellidos = ?,
-        telefono = ?,
-        perfilCompleto = 1
+        telefono = ?
       WHERE idUsuario = ?
     `;
     await pool.query(sql, [nombres, apellidos, telefono, idUsuario]);

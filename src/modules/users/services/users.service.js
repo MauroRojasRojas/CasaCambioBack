@@ -40,7 +40,6 @@ export const usersService = {
       telefono: dto.telefono,
       correo: dto.correo,
       hash,
-      idRol: dto.idRol,
       creadoPor: dto.creadoPor
     });
 

@@ -22,10 +22,12 @@ export const usersRepository = {
     }
 
     if (type === "clients") {
-      where += ` AND r.codigoSistema = 'ROLE_CLIENT'`;
+      // Since roles not implemented, filter by idRol=1 for clients
+      where += ` AND u.idRol = 1`;
     }
     else if (type === "dashboard") {
-      where += ` AND r.codigoSistema != 'ROLE_CLIENT'`;
+      // Since roles not implemented, filter by idRol!=1 for dashboard
+      where += ` AND u.idRol != 1`;
     }
   
     const sqlData = `
@@ -35,14 +37,13 @@ export const usersRepository = {
         u.apellidos,
         u.correo,
         u.telefono,
-        u.idRol,
+        1 AS idRol,
         u.estadoId,
-        r.nombre AS rolNombre,
-        r.codigoSistema AS rolCodigo,
+        'Usuario' AS rolNombre,
+        'USER' AS rolCodigo,
         u.creadoEn,
         u.actualizadoEn
       FROM usuarios u
-      INNER JOIN roles r ON r.idRol = u.idRol
       ${where}
       ORDER BY u.idUsuario DESC
       LIMIT ? OFFSET ?
@@ -51,7 +52,6 @@ export const usersRepository = {
     const sqlCount = `
     SELECT COUNT(*) AS total
     FROM usuarios u
-    INNER JOIN roles r ON r.idRol = u.idRol
     ${where}
   `;
   
@@ -67,16 +67,16 @@ export const usersRepository = {
   // ===========================
   // Insertar usuario
   // ===========================
-  create: async ({ nombres, apellidos, telefono, correo, hash, idRol, creadoPor }) => {
+  create: async ({ nombres, apellidos, telefono, correo, hash, creadoPor }) => {
     const sql = `
       INSERT INTO usuarios (
         nombres, apellidos, telefono, correo,
-        contraseniaHash, idRol, estadoId, creadoPor
-      ) VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+        contraseniaHash, estadoId, creadoPor
+      ) VALUES (?, ?, ?, ?, ?, 1, ?)
     `;
 
     const [result] = await pool.query(sql, [
-      nombres, apellidos, telefono, correo, hash, idRol, creadoPor
+      nombres, apellidos, telefono, correo, hash, creadoPor
     ]);
 
     return result.insertId;
@@ -166,8 +166,7 @@ export const usersRepository = {
         u.apellidos,
         u.correo
       FROM usuarios u
-      JOIN roles r ON r.idRol = u.idRol
-      WHERE r.codigoSistema = 'ROLE_ADMIN'
+      WHERE u.idRol = 2
         AND u.estadoId = 1
     `;
   

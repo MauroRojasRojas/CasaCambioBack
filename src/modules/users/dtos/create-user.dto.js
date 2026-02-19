@@ -8,7 +8,7 @@ export class CreateUserDTO {
     this.celular = body.celular;
     this.correo = body.correo;
     this.password = body.password;
-    this.idRol = body.idRol;
+    this.idRol = body.idRol || 2; // Default
     this.validate();
   }
 
@@ -17,7 +17,7 @@ export class CreateUserDTO {
     if (!this.apellidos) throw new AppError("Debe ingresar apellidos.", 400, "VALIDATION_ERROR");
     if (!this.correo) throw new AppError("Debe ingresar un correo.", 400, "VALIDATION_ERROR");
     if (!this.password) throw new AppError("Debe ingresar una contraseña.", 400, "VALIDATION_ERROR");
-    if (!this.idRol) throw new AppError("Debe seleccionar un rol.", 400, "VALIDATION_ERROR");
+    // idRol es opcional, default 2
   }
 }
 
