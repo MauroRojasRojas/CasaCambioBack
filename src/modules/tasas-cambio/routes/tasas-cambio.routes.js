@@ -24,15 +24,22 @@ router.get('/historico', tasasCambioController.getHistorico);
 router.get('/rango', tasasCambioController.getTasasByDateRange);
 
 /**
- * GET /api/tasas-cambio/:id
- * Obtiene una tasa por ID
- */
-router.get('/:id', tasasCambioController.getTasaById);
-
-/**
  * POST /api/tasas-cambio/actualizar
  * Fuerza una actualización manual de la tasa de cambio
  */
 router.post('/actualizar', tasasCambioController.actualizarTasa);
+
+/**
+ * GET /api/tasas-cambio/desde-inicio-ano/:dia/:mes/:ano
+ * Obtiene tasas de cambio desde el inicio del año hasta la fecha indicada
+ * Params: dia, mes, ano (ej: /19/02/2026)
+ */
+router.get('/desde-inicio-ano/:dia/:mes/:ano', tasasCambioController.getTasasDesdeInicioAno);
+
+/**
+ * GET /api/tasas-cambio/:id
+ * Obtiene una tasa por ID
+ */
+router.get('/:id', tasasCambioController.getTasaById);
 
 export default router;

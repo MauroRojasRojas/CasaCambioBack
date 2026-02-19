@@ -159,5 +159,94 @@ export const tasasCambioService = {
         }
 
         return formatTasaResponse(tasa);
+    },
+
+    /**
+     * Obtiene tasas históricas desde inicio de año hasta la fecha indicada
+     * Recibe parametros separados: dia, mes, ano (fecha final)
+     * Calcula automáticamente: start_date = 1 enero del año, end_date = la fecha enviada
+     * Realiza UNA SOLA llamada a timeframe endpoint con todo el rango
+     * Devuelve sin márgenes (es historial)
+     */
+    async getTasasDesdeInicioAno(dia, mes, ano) {
+        // Validar que sean números válidos
+        const diaNum = parseInt(dia);
+        const mesNum = parseInt(mes);
+        const anoNum = parseInt(ano);
+
+        if (isNaN(diaNum) || isNaN(mesNum) || isNaN(anoNum)) {
+            throw new AppError('Parámetros inválidos: dia, mes y ano deben ser números', 400, 'INVALID_PARAMS');
+        }
+
+        if (diaNum < 1 || diaNum > 31 || mesNum < 1 || mesNum > 12 || anoNum < 2000 || anoNum > 2100) {
+            throw new AppError('Fecha inválida', 400, 'INVALID_DATE');
+        }
+
+        // Crear fecha final a partir de los parámetros
+        const fechaFin = new Date(anoNum, mesNum - 1, diaNum);
+
+        // Validar que la fecha sea válida
+        if (isNaN(fechaFin.getTime())) {
+            throw new AppError('Fecha inválida', 400, 'INVALID_DATE');
+        }
+
+        // Calcular fecha de inicio: 1 de enero del año
+        const año_actual = fechaFin.getFullYear();
+        const fechaInicio = new Date(año_actual, 0, 1);
+
+        // Si la fecha final es hoy o futura, restar 1 día (API no devuelve datos futuros)
+        const hoy = new Date();
+        if (fechaFin >= new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())) {
+            fechaFin.setDate(fechaFin.getDate() - 1);
+        }
+
+        // Convertir a formato YYYY-MM-DD para la API
+        const formatoFecha = (fecha) => {
+            const y = fecha.getFullYear();
+            const m = String(fecha.getMonth() + 1).padStart(2, '0');
+            const d = String(fecha.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        const fechaInicioStr = formatoFecha(fechaInicio);
+        const fechaFinStr = formatoFecha(fechaFin);
+
+        try {
+            // 1 SOLA llamada al endpoint timeframe
+            const response = await currencyApi
+                .timeframe()
+                .startDate(fechaInicioStr)
+                .endDate(fechaFinStr)
+                .base('USD')
+                .get();
+
+            if (!response.valid) {
+                throw new AppError(`Error en API: ${response.error?.message || 'Sin datos disponibles'}`, 400, 'API_ERROR_RESPONSE');
+            }
+
+            if (!response.rates) {
+                throw new AppError(`No hay datos para el rango ${fechaInicioStr} a ${fechaFinStr}`, 404, 'NO_RATES');
+            }
+
+            // Procesar response y extraer tasas de PEN
+            const tasas = [];
+            
+            for (const [fecha, rates] of Object.entries(response.rates)) {
+                if (rates.PEN) {
+                    const tasaApi = rates.PEN;
+                    tasas.push({
+                        fecha: fecha,
+                        tasa_usd_pen: parseFloat(tasaApi.toFixed(4)),
+                        tasa_pen_usd: parseFloat((1 / tasaApi).toFixed(6))
+                    });
+                }
+            }
+
+            return tasas;
+
+        } catch (error) {
+            if (error instanceof AppError) throw error;
+            throw new AppError(`Error al obtener tasas históricas: ${error.message}`, 500, 'TIMEFRAME_API_ERROR');
+        }
     }
 };

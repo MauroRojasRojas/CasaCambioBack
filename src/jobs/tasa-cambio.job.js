@@ -10,7 +10,7 @@ export async function actualizarTasaCambioJob() {
     
     const tasa = await tasasCambioService.fetchAndSaveTasaCambio();
     
-    console.log(`💱 Tasa actualizada: Compra=${tasa.tasa_compra} PEN, Venta=${tasa.tasa_venta} PEN`);
+    console.log(`💱 Tasa actualizada: Compra USD=${tasa.tasa_compra_usd} PEN, Venta USD=${tasa.tasa_venta_usd} PEN`);
   } catch (error) {
     console.error("❌ Error en actualizarTasaCambioJob:", error.message);
   }

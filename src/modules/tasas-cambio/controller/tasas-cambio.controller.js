@@ -70,5 +70,20 @@ export const tasasCambioController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    /**
+     * GET /api/tasas-cambio/desde-inicio-ano/:dia/:mes/:ano
+     * Obtiene tasas de cambio desde inicio de año hasta la fecha indicada
+     * Parámetros: dia, mes, ano (ej: 19/02/2026)
+     */
+    async getTasasDesdeInicioAno(req, res, next) {
+        try {
+            const { dia, mes, ano } = req.params;
+            const tasas = await tasasCambioService.getTasasDesdeInicioAno(dia, mes, ano);
+            return ApiResponse.success(res, tasas, `${tasas.length} tasas obtenidas desde inicio de año`);
+        } catch (error) {
+            next(error);
+        }
     }
 };
