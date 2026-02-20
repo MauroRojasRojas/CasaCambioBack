@@ -64,19 +64,19 @@ export const tasasCambioService = {
             const tasaApi = response.rates.PEN; // Valor de 1 USD en PEN (ej: 3.76)
 
             // ============ OPERACIONES CON USD (compramos/vendemos USD) ============
-            // Compramos USD del cliente (cliente VENDE USD) - Tasa más baja
-            const tasa_compra_usd = tasaApi - MARGEN_COMPRA;
+            // Compramos USD del cliente (cliente VENDE USD) - Tasa más alta
+            const tasa_compra_usd = tasaApi + MARGEN_VENTA;
             
-            // Vendemos USD al cliente (cliente COMPRA USD) - Tasa más alta
-            const tasa_venta_usd = tasaApi + MARGEN_VENTA;
+            // Vendemos USD al cliente (cliente COMPRA USD) - Tasa más baja
+            const tasa_venta_usd = tasaApi - MARGEN_COMPRA;
 
             // ============ OPERACIONES CON PEN (compramos/vendemos PEN) ============
             // Compramos PEN del cliente (cliente VENDE PEN = COMPRA USD)
-            // Tasa más baja en USD por PEN
+            // Tasa más alta en USD por PEN
             const tasa_compra_pen = 1 / tasa_venta_usd;
             
             // Vendemos PEN al cliente (cliente COMPRA PEN = VENDE USD)
-            // Tasa más alta en USD por PEN
+            // Tasa más baja en USD por PEN
             const tasa_venta_pen = 1 / tasa_compra_usd;
 
             // Guardar en base de datos
