@@ -25,10 +25,8 @@ app.use(
     origin: [
       "http://localhost:4200",
       "http://localhost:4300",
-      "https://www.hotelgeno.com",
-      "https://hotelgeno.com",
-      "https://panel.hotelgeno.com",
-      "https://www.panel.hotelgeno.com",
+      "https://www.dollariza.pe",
+      "https://dollariza.pe",
       "http://localhost:3000",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
