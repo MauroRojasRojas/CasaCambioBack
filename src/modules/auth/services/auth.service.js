@@ -142,7 +142,6 @@ export async function verifySession(dto) {
       throw new AppError("No tiene permisos para este módulo.", 403, "AUTH_FORBIDDEN");
     }
   } */
- console.log('userdb', userDb)
 
   // 5. Respuesta final (misma estructura que tu login)
   return {

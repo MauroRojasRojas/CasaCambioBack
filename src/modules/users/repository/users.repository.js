@@ -67,7 +67,8 @@ export const usersRepository = {
   // ===========================
   // Insertar usuario
   // ===========================
-  create: async ({ nombres, apellidos, telefono, correo, hash, creadoPor }) => {
+  create: async ({ nombres, apellidos, telefono, correo, hash, creadoPor }, conn = null) => {
+    const db = conn ?? pool;
     const sql = `
       INSERT INTO usuarios (
         nombres, apellidos, telefono, correo,
@@ -75,7 +76,7 @@ export const usersRepository = {
       ) VALUES (?, ?, ?, ?, ?, 1, ?)
     `;
 
-    const [result] = await pool.query(sql, [
+    const [result] = await db.query(sql, [
       nombres, apellidos, telefono, correo, hash, creadoPor
     ]);
 
@@ -148,14 +149,15 @@ export const usersRepository = {
   // ===========================
   // Verificar correo duplicado
   // ===========================
-  existsMail: async (correo) => {
+  existsMail: async (correo, conn = null) => {
+    const db = conn ?? pool;
     const sql = `
       SELECT idUsuario
       FROM usuarios
       WHERE correo = ?
       LIMIT 1
     `;
-    const [rows] = await pool.query(sql, [correo]);
+    const [rows] = await db.query(sql, [correo]);
     return rows.length > 0;
   },
   async findAdmins() {

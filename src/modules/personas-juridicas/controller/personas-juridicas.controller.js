@@ -7,6 +7,14 @@ export const personasJuridicasController = {
     // Crear persona jurídica
     async create(req, res) {
         try {
+            req.body.departamentoSeleccionado =
+              req.body.departamentoSeleccionado == null ? null : String(req.body.departamentoSeleccionado);
+            
+            req.body.provinciaSeleccionada =
+              req.body.provinciaSeleccionada == null ? null : String(req.body.provinciaSeleccionada);
+            
+            req.body.distritoSeleccionado =
+              req.body.distritoSeleccionado == null ? null : String(req.body.distritoSeleccionado);
             const { error, value } = createPersonaJuridicaDto.validate(req.body);
             if (error) {
                 return ApiResponse.error(res, error.details[0].message, 400);

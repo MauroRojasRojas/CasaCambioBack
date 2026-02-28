@@ -14,7 +14,7 @@ export const operacionesController = {
         return ApiResponse.error(res, error.details[0].message, 400);
       }
 
-      const operacion = await operacionesService.createOperacion(value);
+      const operacion = await operacionesService.createOperacion(value, req.user);
       ApiResponse.success(res, 'Operación creada exitosamente', operacion, 201);
     } catch (err) {
       ApiResponse.error(res, err.message, err.status || 500);

@@ -9,8 +9,9 @@ import filesRoutes from "./src/modules/files/routes/files.routes.js";
 import personasRoutes from "./src/modules/personas/routes/personas.routes.js";
 import ubigeoRoutes from "./src/modules/ubigeo/routes/ubigeo.routes.js";
 import cuentasBancariasRoutes from "./src/modules/cuentas-bancarias/routes/cuentas-bancarias.routes.js";
-import operacionesRoutes from "./src/modules/operaciones/routes/operaciones.routes.js";
 import tasasCambioRoutes from "./src/modules/tasas-cambio/routes/tasas-cambio.routes.js";
+import operacionesRoutes from "./src/modules/operaciones/routes/operaciones.routes.js";
+import reclamosRoutes from "./src/modules/operaciones/routes/reclamos.routes.js";
 
 import { errorHandler } from "./src/core/errors/error-handler.js";
 import { initJobs } from "./src/jobs/index.js";
@@ -51,6 +52,7 @@ app.use("/api/personas", personasRoutes);
 app.use("/api/ubigeo", ubigeoRoutes);
 app.use("/api/cuentas-bancarias", cuentasBancariasRoutes);
 app.use("/api/operaciones", operacionesRoutes);
+app.use("/api/reclamos", reclamosRoutes);
 app.use("/api/tasas-cambio", tasasCambioRoutes);
 // === Error handler global ===
 app.use(errorHandler);

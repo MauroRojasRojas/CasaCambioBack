@@ -26,8 +26,8 @@ export const usersService = {
   // =====================================
   // CREAR
   // =====================================
-  async createUser(dto) {
-    const exists = await usersRepository.existsMail(dto.correo);
+  async createUser(dto, conn = null) {
+    const exists = await usersRepository.existsMail(dto.correo, conn);
     if (exists) {
       throw new AppError("El correo ya está registrado.", 400, "EMAIL_EXISTS");
     }
@@ -41,7 +41,7 @@ export const usersService = {
       correo: dto.correo,
       hash,
       creadoPor: dto.creadoPor
-    });
+    }, conn);
 
     return { idUsuario: id };
   },

@@ -2,7 +2,8 @@ import pool from '../../../keys.js';
 
 export const personasNaturalesRepository = {
     // Crear una persona natural
-    async create(personaData) {
+    async create(personaData, conn = null) {
+        const db = conn ?? pool;
         console.log('Repository: Insertando persona');
         const {
             tipoDocumento, numeroDocumento, nombres, apellidos, genero, fechaNacimiento,
@@ -20,14 +21,14 @@ export const personasNaturalesRepository = {
         console.log('Query:', query);
         console.log('Values:', values);
 
-        const [result] = await pool.execute(query, values);
+        const [result] = await db.execute(query, values);
         const id = result.insertId;
         console.log('Persona insertada ID:', id);
 
         // Generar código
         const codigo = `${id}N`;
         console.log('Generando código:', codigo);
-        await pool.execute('UPDATE personas_naturales SET codigo = ? WHERE id = ?', [codigo, id]);
+        await db.execute('UPDATE personas_naturales SET codigo = ? WHERE id = ?', [codigo, id]);
         console.log('Código actualizado');
 
         return id;

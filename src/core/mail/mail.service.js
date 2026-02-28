@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { AppError } from "../errors/app-error.js"
-import { adminReservaEnRevisionTemplate, otpTemplate, preReservaTemplate, recoveryTemplate, reservaConfirmadaTemplate } from "./mail.templates.js";
+import { adminReservaEnRevisionTemplate, complaintTemplate, operacionConstanciaTemplate, otpTemplate, preReservaTemplate, recoveryTemplate, reservaConfirmadaTemplate, welcomeTemplate } from "./mail.templates.js";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -45,7 +45,6 @@ export async function sendPasswordResetEmail({ to, resetUrl }) {
       subject: 'Recuperación de contraseña',
       html: recoveryTemplate({ resetUrl }),
     });
-    console.log('SENDDD', send)
   } catch (error) {
     console.error('RESEND ERROR:', error);
     throw new AppError(
@@ -153,5 +152,59 @@ export async function sendReservaConfirmadaEmail({
       500,
       'MAIL_SEND_FAILED'
     );
+  }
+}
+
+export async function sendWelcomeEmail({ to, nombre }) {
+  try {
+    const send = await resend.emails.send({
+      from: process.env.MAIL_FROM,
+      to,
+      subject: "¡Bienvenido/a! Tu cuenta fue creada",
+      html: welcomeTemplate({
+        nombre,
+        correo: to,
+        loginUrl: `${process.env.FRONT_URL}/login`, // ajusta si tu ruta es otra
+      }),
+    });
+    console.log('SENDDD', send)
+  } catch (error) {
+    console.error("RESEND ERROR (WELCOME):", error);
+    throw new AppError("Error al enviar correo de bienvenida", 500, "MAIL_SEND_FAILED");
+  }
+}
+
+export async function sendOperacionConstanciaEmail(payload) {
+  try {
+    const loginUrl = `${process.env.FRONT_URL}/login`; // ajusta ruta real
+
+    console.log('payload',payload)
+  
+    const reset = await resend.emails.send({
+      from: process.env.MAIL_FROM,
+      to: payload.to,
+      subject: `Constancia de operación - ${payload.codigoOperacion}`,
+      html: operacionConstanciaTemplate({ ...payload, loginUrl }),
+    });
+    console.log('resett',reset)
+
+  }catch (error) {
+    console.error("RESEND ERROR (OPERACION CONSTANCIA):", error);
+    throw new AppError("Error al enviar correo de constancia de operación", 500, "MAIL_SEND_FAILED");
+  }
+}
+
+export async function sendComplaintEmail(payload) {
+  try {
+    const send = await resend.emails.send({
+      from: process.env.MAIL_FROM,
+      to: payload.to,
+      subject: payload.subject,
+      html: complaintTemplate(payload),
+    });
+    return send;
+  } catch (error) {
+    console.error("RESEND ERROR (COMPLAINT):", error);
+    throw new AppError("Error al enviar correo de reclamo", 500, "MAIL_SEND_FAILED");
   }
 }

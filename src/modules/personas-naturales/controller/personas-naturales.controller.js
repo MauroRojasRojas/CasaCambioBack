@@ -8,7 +8,16 @@ export const personasNaturalesController = {
     async create(req, res) {
         console.log('Entrando a create persona natural');
         try {
+            
             console.log('Validando DTO');
+            req.body.departamentoSeleccionado =
+              req.body.departamentoSeleccionado == null ? null : String(req.body.departamentoSeleccionado);
+            
+            req.body.provinciaSeleccionada =
+              req.body.provinciaSeleccionada == null ? null : String(req.body.provinciaSeleccionada);
+            
+            req.body.distritoSeleccionado =
+              req.body.distritoSeleccionado == null ? null : String(req.body.distritoSeleccionado);
             const { error, value } = createPersonaNaturalDto.validate(req.body);
             if (error) {
                 console.log('Error en validación:', error.details[0].message);
