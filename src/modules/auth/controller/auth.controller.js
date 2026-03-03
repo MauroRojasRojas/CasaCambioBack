@@ -3,6 +3,7 @@ import { loginService, verifySession, resendOtpService, refreshTokenService, ver
 import { LoginRequestDTO } from "../dtos/login-request.dto.js";
 import { AppError } from "../../../core/errors/app-error.js";
 import { forgotPasswordService, resetPasswordService, validateResetTokenService } from "../services/password-reset.service.js";
+import { authRepository } from "../repository/auth.repository.js";
 
 export async function login(req, res, next) {
   try {
@@ -133,6 +134,11 @@ export async function forgotPasswordController(req, res, next) {
 
     if (!email) {
       throw new AppError("El correo electrónico es obligatorio.", 400, "VALIDATION_ERROR");
+    }
+
+    const user = await authRepository.findUserByMailAllStates(email);
+    if (!user) {
+      throw new AppError("El correo no existe en nuestros registros.", 404, "EMAIL_NOT_FOUND");
     }
 
     const result = await forgotPasswordService({ email });
