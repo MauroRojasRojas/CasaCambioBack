@@ -68,7 +68,7 @@ export const tasasCambioService = {
             const tasa_compra_usd = tasaApi + MARGEN_VENTA;
             
             // Vendemos USD al cliente (cliente COMPRA USD) - Tasa más baja
-            const tasa_venta_usd = tasaApi - MARGEN_COMPRA;
+            const tasa_venta_usd = tasaApi + MARGEN_COMPRA;
 
             // ============ OPERACIONES CON PEN (compramos/vendemos PEN) ============
             // Compramos PEN del cliente (cliente VENDE PEN = COMPRA USD)
