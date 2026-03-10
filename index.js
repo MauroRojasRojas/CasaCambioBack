@@ -12,6 +12,7 @@ import cuentasBancariasRoutes from "./src/modules/cuentas-bancarias/routes/cuent
 import tasasCambioRoutes from "./src/modules/tasas-cambio/routes/tasas-cambio.routes.js";
 import operacionesRoutes from "./src/modules/operaciones/routes/operaciones.routes.js";
 import reclamosRoutes from "./src/modules/operaciones/routes/reclamos.routes.js";
+import contactRoutes from "./src/modules/operaciones/routes/contact.route.js";
 
 import { errorHandler } from "./src/core/errors/error-handler.js";
 import { initJobs } from "./src/jobs/index.js";
@@ -51,6 +52,7 @@ app.use("/api/ubigeo", ubigeoRoutes);
 app.use("/api/cuentas-bancarias", cuentasBancariasRoutes);
 app.use("/api/operaciones", operacionesRoutes);
 app.use("/api/reclamos", reclamosRoutes);
+app.use("/api/contact-us", contactRoutes);
 app.use("/api/tasas-cambio", tasasCambioRoutes);
 // === Error handler global ===
 app.use(errorHandler);

@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { AppError } from "../errors/app-error.js"
-import { adminReservaEnRevisionTemplate, complaintTemplate, operacionConstanciaTemplate, otpTemplate, preReservaTemplate, recoveryTemplate, reservaConfirmadaTemplate, welcomeTemplate } from "./mail.templates.js";
+import { adminReservaEnRevisionTemplate, complaintTemplate, contactUsTemplate, operacionConstanciaTemplate, otpTemplate, preReservaTemplate, recoveryTemplate, reservaConfirmadaTemplate, welcomeTemplate } from "./mail.templates.js";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -206,5 +206,19 @@ export async function sendComplaintEmail(payload) {
   } catch (error) {
     console.error("RESEND ERROR (COMPLAINT):", error);
     throw new AppError("Error al enviar correo de reclamo", 500, "MAIL_SEND_FAILED");
+  }
+}
+
+export async function sendContactUsEmail(payload) {
+  try {
+    await resend.emails.send({
+      from: process.env.MAIL_FROM,
+      to: payload.to,
+      subject: payload.subject,
+      html: contactUsTemplate(payload),
+    });
+  } catch (error) {
+    console.error('RESEND ERROR (CONTACTUS):', error);
+    throw new AppError('Error al enviar correo de contáctanos', 500, 'MAIL_SEND_FAILED');
   }
 }

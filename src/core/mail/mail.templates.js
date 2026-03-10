@@ -561,3 +561,31 @@ export const complaintTemplate = ({
     </p>
   </div>
 `;
+
+export const contactUsTemplate = ({
+  fecha = '',
+  name = '',
+  email = '',
+  subjectText = '',
+  message = '',
+}) => `
+  <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:720px;margin:0 auto;">
+    <h2 style="margin:0 0 6px;color:#02254A;">Nuevo mensaje - Contáctanos</h2>
+    <p style="margin:0 0 12px;color:#475569;"><b>Fecha:</b> ${fecha}</p>
+
+    <div style="border:1px solid #e2e8f0;border-radius:14px;padding:14px;background:#f8fafc;">
+      <p style="margin:0 0 6px;"><b>Nombre:</b> ${name}</p>
+      <p style="margin:0 0 6px;"><b>Correo:</b> ${email}</p>
+      <p style="margin:0;"><b>Asunto:</b> ${subjectText}</p>
+    </div>
+
+    <p style="margin:16px 0 8px;color:#475569;"><b>Mensaje:</b></p>
+    <div style="white-space:pre-wrap;border:1px solid #e2e8f0;border-radius:12px;padding:12px;background:#ffffff;">
+      ${message}
+    </div>
+
+    <p style="margin:16px 0 0;color:#64748b;font-size:12px;">
+      Enviado automáticamente desde el formulario “Contáctanos”.
+    </p>
+  </div>
+`;
