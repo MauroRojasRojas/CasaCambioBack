@@ -56,18 +56,43 @@ export async function loginService({ correo, password }) {
   }
 
   // Buscar persona asociada
-  const [naturalRows] = await pool.execute('SELECT id, codigo FROM personas_naturales WHERE correo = ? LIMIT 1', [user.correo]);
-  const [juridicaRows] = await pool.execute('SELECT id, codigo FROM personas_juridicas WHERE correo = ? LIMIT 1', [user.correo]);
-
+  const naturalProfile = await authRepository.findPersonaProfileByMail(
+    'personas_naturales',
+    user.correo
+  );
+  
+  const juridicaProfile = await authRepository.findPersonaProfileByMail(
+    'personas_juridicas',
+    user.correo
+  );
+  
   let rolCodigoFinal = rol.codigoSistema;
   let perfilCompletoFinal = user.perfilCompleto;
-
-  if (naturalRows.length > 0) {
-    rolCodigoFinal = "USER_NATURAL";
-    perfilCompletoFinal = naturalRows[0].codigo;
-  } else if (juridicaRows.length > 0) {
-    rolCodigoFinal = "USER_JURIDICA";
-    perfilCompletoFinal = juridicaRows[0].codigo;
+  let departamento = null;
+  let provincia = null;
+  let distrito = null;
+  let direccion = null;
+  let numeroDocumento = null;
+  let tipoDocumento = null;
+  
+  if (naturalProfile) {
+    rolCodigoFinal = 'USER_NATURAL';
+    perfilCompletoFinal = naturalProfile.codigo;
+    departamento = naturalProfile.departamento;
+    provincia = naturalProfile.provincia;
+    distrito = naturalProfile.distrito;
+    direccion = naturalProfile.direccion;
+    tipoDocumento = naturalProfile.tipoDocumento;
+    numeroDocumento = naturalProfile.numeroDocumento;
+  } else if (juridicaProfile) {
+    rolCodigoFinal = 'USER_JURIDICA';
+    perfilCompletoFinal = juridicaProfile.codigo;
+    departamento = juridicaProfile.departamento;
+    provincia = juridicaProfile.provincia;
+    distrito = juridicaProfile.distrito;
+    direccion = juridicaProfile.direccion;
+    tipoDocumento = juridicaProfile.tipoDocumento;
+    numeroDocumento = juridicaProfile.numeroDocumento;
   }
 
   // Generar token
@@ -99,6 +124,12 @@ export async function loginService({ correo, password }) {
       apellidos: user.apellidos,
       correo: user.correo,
       telefono: user.telefono,
+      departamento,
+      provincia,
+      distrito,
+      direccion,
+      tipoDocumento,
+      numeroDocumento,
       rolNombre: rol.nombre,
       rolCodigo: rolCodigoFinal,
       perfilCompleto: perfilCompletoFinal,

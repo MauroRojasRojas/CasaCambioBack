@@ -12,9 +12,6 @@ function escapeHtml(s = "") {
 }
 
 export const reclamosService = {
-  // ===========================
-  // Enviar reclamo por correo
-  // ===========================
   send: async (data) => {
     try {
       const to = process.env.COMPLAINTS_TO;
@@ -23,25 +20,35 @@ export const reclamosService = {
       }
 
       const fecha = new Date().toLocaleString("es-PE", {
-  timeZone: "America/Lima",
-});
+        timeZone: "America/Lima",
+      });
+
       const tipo = data.complaintType === "reclamo" ? "RECLAMO" : "QUEJA";
 
-      // armamos payload para template
       const payload = {
         to,
         subject: `Libro de Reclamaciones: ${tipo} - OPERACIÓN ${data.operationNumber}`,
         fecha,
         tipo,
+
         email: escapeHtml(data.email),
+        alternateEmail: data.alternateEmail
+          ? escapeHtml(data.alternateEmail)
+          : "—",
 
         nombres: escapeHtml(data.firstName),
-        apellidos: escapeHtml(`${data.fatherSurname} ${data.motherSurname}`),
+        apellidos: escapeHtml(
+          [data.fatherSurname, data.motherSurname].filter(Boolean).join(" ")
+        ),
 
         documentType: escapeHtml(data.documentType),
         documentNumber: escapeHtml(data.documentNumber),
 
         phone: escapeHtml(data.phone),
+        additionalPhone: data.additionalPhone
+          ? escapeHtml(data.additionalPhone)
+          : "—",
+
         address: escapeHtml(data.address),
         district: escapeHtml(data.district),
         province: escapeHtml(data.province),
@@ -50,21 +57,18 @@ export const reclamosService = {
         service: escapeHtml(data.service),
         operationNumber: escapeHtml(data.operationNumber),
 
-        amountSoles:
-          data.amountSoles != null
-            ? `S/ ${Number(data.amountSoles).toFixed(2)}`
-            : "—",
-        amountDollars:
-          data.amountDollars != null
-            ? `$ ${Number(data.amountDollars).toFixed(2)}`
-            : "—",
+        amountSent: data.amountSoles
+          ? escapeHtml(String(data.amountSoles))
+          : "0.00",
 
-        // textareas (escapados)
+        amountReceived: data.amountDollars
+          ? escapeHtml(String(data.amountDollars))
+          : "0.00",
+
         detail: escapeHtml(data.detail),
         request: escapeHtml(data.request),
       };
 
-      // correo no bloqueante (igual a tu patrón)
       try {
         await sendComplaintEmail(payload);
       } catch (e) {

@@ -327,6 +327,37 @@ export const authRepository = {
       `,
       [idUsuario]
     );
-  }
+  },
+  findPersonaProfileByMail: async (tableName, correo) => {
+    const allowedTables = ['personas_naturales', 'personas_juridicas'];
+
+    if (!allowedTables.includes(tableName)) {
+      throw new Error('Tabla no permitida');
+    }
+
+    const sql = `
+      SELECT
+        p.id,
+        p.codigo,
+        dep.nombre AS departamento,
+        prov.nombre AS provincia,
+        dist.nombre AS distrito,
+        p.direccion,
+        p.tipoDocumento,
+        p.numeroDocumento
+      FROM ${tableName} p
+      LEFT JOIN departamento dep
+        ON dep.id = p.departamentoSeleccionado
+      LEFT JOIN provincia prov
+        ON prov.id = p.provinciaSeleccionada
+      LEFT JOIN distrito dist
+        ON dist.id = p.distritoSeleccionado
+      WHERE p.correo = ?
+      LIMIT 1
+    `;
+
+    const [rows] = await pool.execute(sql, [correo]);
+    return rows[0] || null;
+  },
   
 };
