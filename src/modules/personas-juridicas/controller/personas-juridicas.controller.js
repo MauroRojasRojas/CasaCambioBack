@@ -5,27 +5,57 @@ import { ApiResponse } from '../../../core/utils/api-response.js';
 
 export const personasJuridicasController = {
     // Crear persona jurídica
-    async create(req, res) {
-        try {
-            req.body.departamentoSeleccionado =
-              req.body.departamentoSeleccionado == null ? null : String(req.body.departamentoSeleccionado);
-            
-            req.body.provinciaSeleccionada =
-              req.body.provinciaSeleccionada == null ? null : String(req.body.provinciaSeleccionada);
-            
-            req.body.distritoSeleccionado =
-              req.body.distritoSeleccionado == null ? null : String(req.body.distritoSeleccionado);
-            const { error, value } = createPersonaJuridicaDto.validate(req.body);
-            if (error) {
-                return ApiResponse.error(res, error.details[0].message, 400);
-            }
+async create(req, res) {
+  try {
+    req.body.departamentoSeleccionado =
+      req.body.departamentoSeleccionado == null ? null : String(req.body.departamentoSeleccionado);
 
-            const persona = await personasJuridicasService.createPersonaJuridica(value);
-            ApiResponse.success(res, 'Persona jurídica creada exitosamente', persona, 201);
-        } catch (err) {
-            ApiResponse.error(res, err.message, err.status || 500);
-        }
-    },
+    req.body.provinciaSeleccionada =
+      req.body.provinciaSeleccionada == null ? null : String(req.body.provinciaSeleccionada);
+
+    req.body.distritoSeleccionado =
+      req.body.distritoSeleccionado == null ? null : String(req.body.distritoSeleccionado);
+
+    if (req.body.accionistas?.length > 0) {
+      req.body.accionistas = req.body.accionistas.map((a) => {
+        return {
+          ...a,
+          departamentoSeleccionado:
+            a.departamentoSeleccionado == null ? null : String(a.departamentoSeleccionado),
+          provinciaSeleccionada:
+            a.provinciaSeleccionada == null ? null : String(a.provinciaSeleccionada),
+          distritoSeleccionado:
+            a.distritoSeleccionado == null ? null : String(a.distritoSeleccionado),
+        };
+      });
+    }
+
+    if (req.body.representantesLegales?.length > 0) {
+      req.body.representantesLegales = req.body.representantesLegales.map((a) => {
+        return {
+          ...a,
+          departamentoSeleccionado:
+            a.departamentoSeleccionado == null ? null : String(a.departamentoSeleccionado),
+          provinciaSeleccionada:
+            a.provinciaSeleccionada == null ? null : String(a.provinciaSeleccionada),
+          distritoSeleccionado:
+            a.distritoSeleccionado == null ? null : String(a.distritoSeleccionado),
+        };
+      });
+    }
+
+    const { error, value } = createPersonaJuridicaDto.validate(req.body);
+
+    if (error) {
+      return ApiResponse.error(res, error.details[0].message, 400);
+    }
+
+    const persona = await personasJuridicasService.createPersonaJuridica(value);
+    return ApiResponse.success(res, 'Persona jurídica creada exitosamente', persona, 201);
+  } catch (err) {
+    return ApiResponse.error(res, err.message, err.status || 500);
+  }
+},
 
     // Obtener por ID
     async getById(req, res) {

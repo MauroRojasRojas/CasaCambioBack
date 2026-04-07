@@ -2,10 +2,11 @@ import pool from '../../../keys.js';
 
 export const accionistasRepository = {
     // Crear accionista
-    async create(accionistaData) {
+    async create(accionistaData, trx) {
         const { personaJuridicaId, personaNaturalId, porcentaje } = accionistaData;
+        const conn = trx || pool;
         const query = 'INSERT INTO accionistas (personaJuridicaId, personaNaturalId, porcentaje) VALUES (?, ?, ?)';
-        const [result] = await pool.execute(query, [personaJuridicaId, personaNaturalId, porcentaje]);
+        const [result] = await conn.execute(query, [personaJuridicaId, personaNaturalId, porcentaje]);
         return result.insertId;
     },
 

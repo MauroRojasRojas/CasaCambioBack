@@ -125,7 +125,8 @@ export const authRepository = {
     return result.insertId;
   },
 
-  async createVerifiedUser({ correo, passwordHash, authProvider, nombres, apellidos, telefono }) {
+  async createVerifiedUser({ correo, passwordHash, authProvider, nombres, apellidos, telefono }, trx) {
+    const conn = trx || pool;
     const sql = `
       INSERT INTO usuarios (
         correo,
@@ -141,7 +142,7 @@ export const authRepository = {
       )
       VALUES (?, ?, ?, ?, ?, 1, 1, 1, ?, NOW())
     `;
-    const [result] = await pool.query(sql, [
+    const [result] = await conn.query(sql, [
       correo,
       passwordHash,
       nombres,

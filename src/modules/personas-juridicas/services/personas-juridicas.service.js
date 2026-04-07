@@ -17,6 +17,95 @@ export const personasJuridicasService = {
 
     // Crear persona jurídica
     async createPersonaJuridica(personaData) {
+        const trx = await pool.getConnection();
+
+    try {
+        await trx.beginTransaction();
+        // Verificar unicidad dentro de la transacción si aplica
+        const existingDoc = await this.findByNumeroDocumento(personaData.numeroDocumento, trx);
+        if (existingDoc) {
+            throw new AppError('El número de documento ya existe', 400, 'DOCUMENTO_EXISTS');
+        }
+
+        const {
+            accionistas,
+            representantesLegales,
+            contrasena,
+            confirmarContrasena,
+            ...personaFields
+        } = personaData;
+
+        const personaId = await personasJuridicasRepository.create(personaFields, trx);
+
+        const ubicacion = {
+            departamentoSeleccionado: personaFields.departamentoSeleccionado,
+            provinciaSeleccionada: personaFields.provinciaSeleccionada,
+            distritoSeleccionado: personaFields.distritoSeleccionado,
+            estadoExtranjero: personaFields.estadoExtranjero,
+            paisSeleccionado: personaFields.paisSeleccionado
+        };
+
+        if (accionistas && accionistas.length > 0) {
+            for (const acc of accionistas) {
+                const { contrasena, confirmarContrasena, cargo, ...accFields } = acc;
+
+                const accData = {
+                    ...accFields,
+                    ...ubicacion
+                };
+
+                const personaNaturalId = await personasNaturalesRepository.create(accData, trx);
+
+                await accionistasRepository.create({
+                    personaJuridicaId: personaId,
+                    personaNaturalId,
+                    porcentaje: acc.porcentaje || 0
+                }, trx);
+            }
+        }
+
+        if (representantesLegales && representantesLegales.length > 0) {
+            for (const rep of representantesLegales) {
+                const { contrasena, confirmarContrasena, ...repFields } = rep;
+
+                const repData = {
+                    ...repFields,
+                    ...ubicacion
+                };
+
+                const personaNaturalId = await personasNaturalesRepository.create(repData, trx);
+
+                await representantesLegalesRepository.create({
+                    personaJuridicaId: personaId,
+                    personaNaturalId,
+                    cargo: rep.cargo,
+                    correo: rep.correo,
+                    telefono: rep.telefono
+                }, trx);
+            }
+        }
+
+        const passwordHash = await hashPassword(contrasena);
+
+        await authRepository.createVerifiedUser({
+            correo: personaFields.correo,
+            passwordHash,
+            authProvider: 0,
+            nombres: personaFields.razonSocial,
+            apellidos: '',
+            telefono: personaFields.telefono
+        }, trx);
+
+        await trx.commit();
+
+        return { id: personaId, ...personaFields };
+    } catch (error) {
+        await trx.rollback();
+        throw error;
+    } finally {
+    }
+},
+/*     async createPersonaJuridica(personaData) {
         // Verificar unicidad
         const existingDoc = await this.findByNumeroDocumento(personaData.numeroDocumento);
         if (existingDoc) {
@@ -77,7 +166,7 @@ export const personasJuridicasService = {
         });
 
         return { id: personaId, ...personaFields };
-    },
+    }, */
 
     // Obtener por ID con relaciones
     async getPersonaJuridicaById(id) {

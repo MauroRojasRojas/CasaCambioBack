@@ -2,7 +2,8 @@ import pool from '../../../keys.js';
 
 export const personasJuridicasRepository = {
     // Crear una persona jurídica
-    async create(personaData) {
+    async create(personaData, trx) {
+        const conn = trx || pool;
         const {
             tipoDocumento, numeroDocumento, razonSocial, correo, telefono, direccion,
             departamentoSeleccionado, provinciaSeleccionada, distritoSeleccionado,
@@ -22,12 +23,12 @@ export const personasJuridicasRepository = {
             estadoExtranjero, paisSeleccionado, terminosAceptados
         ];
 
-        const [result] = await pool.execute(query, values);
+        const [result] = await conn.execute(query, values);
         const id = result.insertId;
 
         // Generar código
         const codigo = `${id}J`;
-        await pool.execute('UPDATE personas_juridicas SET codigo = ? WHERE id = ?', [codigo, id]);
+        await conn.execute('UPDATE personas_juridicas SET codigo = ? WHERE id = ?', [codigo, id]);
 
         return id;
     },
