@@ -104,7 +104,7 @@ export async function loginService({ correo, password }) {
       //rol: user.idRol
     },
     process.env.KEY_JWT,
-    { expiresIn: "15m" }
+    { expiresIn: "7d" }
   );
 
   // 6. Refresh Token (LARGO)
@@ -659,7 +659,7 @@ export async function refreshTokenService({ refreshToken }) {
       rol: rol.codigoSistema
     },
     process.env.KEY_JWT,
-    { expiresIn: "15m" }
+    { expiresIn: "7d" }
   );
 
   return { accessToken };
