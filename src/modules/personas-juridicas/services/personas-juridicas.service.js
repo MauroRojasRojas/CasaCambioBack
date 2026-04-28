@@ -6,6 +6,7 @@ import { authRepository } from '../../auth/repository/auth.repository.js';
 import { hashPassword } from '../../../core/utils/hash.util.js';
 import { AppError } from '../../../core/errors/app-error.js';
 import pool from '../../../keys.js';
+import { sendWelcomeEmail } from '../../../core/mail/mail.service.js';
 
 export const personasJuridicasService = {
     // Verificar si numeroDocumento ya existe
@@ -97,6 +98,16 @@ export const personasJuridicasService = {
         }, trx);
 
         await trx.commit();
+
+        try {
+          await sendWelcomeEmail({
+            to: personaData.correo,
+            nombre: personaData.razonSocial,
+          });
+        } catch (mailErr) {
+          console.log("⚠️ No se pudo enviar bienvenida:", mailErr.message);
+          // opcional: guardar pendiente para reintento
+        }
 
         return { id: personaId, ...personaFields };
     } catch (error) {
