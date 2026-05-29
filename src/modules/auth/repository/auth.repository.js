@@ -2,7 +2,7 @@ import pool from '../../../keys.js';
 
 export const authRepository = {
 
-  findUserById: async (idUsuario) => {
+findUserById: async (idUsuario) => {
     const sql = `
       SELECT 
         u.idUsuario,
@@ -11,22 +11,22 @@ export const authRepository = {
         u.telefono,
         u.correo,
         u.contraseniaHash,
+        u.rol,
         1 AS idRol,
         u.estadoId,
         u.perfilCompleto,
         'Usuario' AS rolNombre,
-        'USER' AS rolCodigo,
+        u.rol AS rolCodigo,
         u.creadoEn
       FROM usuarios u
       WHERE u.idUsuario = ?
       LIMIT 1;
     `;
-
     const [rows] = await pool.query(sql, [idUsuario]);
     return rows[0] || null;
-  },
+},
   
-  findUserByMail: async (correo) => {
+findUserByMail: async (correo) => {
     const sql = `
       SELECT
         u.idUsuario,
@@ -35,6 +35,7 @@ export const authRepository = {
         u.telefono,
         u.correo,
         u.contraseniaHash,
+        u.rol,
         1 AS idRol,
         u.perfilCompleto,
         u.estadoId,
@@ -42,15 +43,14 @@ export const authRepository = {
         u.authProvider,
         u.creadoEn,
         'Usuario' AS rolNombre,
-        'USER' AS rolCodigo
+        u.rol AS rolCodigo
       FROM usuarios u
       WHERE u.correo = ?
       LIMIT 1
     `;
-  console.log('pool', pool)
     const [rows] = await pool.query(sql, [correo]);
     return rows[0] || null;
-  },
+},
 
   findRolById: async (idRol) => {
     // Since roles not implemented, return dummy role

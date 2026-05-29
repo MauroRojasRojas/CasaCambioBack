@@ -1,6 +1,6 @@
 import { tasasCambioService } from '../services/tasas-cambio.service.js';
 import { ApiResponse } from '../../../core/utils/api-response.js';
-
+import { tasasCambioRepository } from '../repository/tasas-cambio.repository.js';
 export const tasasCambioController = {
     /**
      * GET /api/tasas-cambio/actual
@@ -85,5 +85,14 @@ export const tasasCambioController = {
         } catch (error) {
             next(error);
         }
+    } ,
+
+async getTasaApi(req, res, next) {
+    try {
+        const tasa = await tasasCambioService.getTasaApiRaw();
+        return ApiResponse.success(res, { tasa_api: tasa });
+    } catch (error) {
+        next(error);
     }
+}
 };

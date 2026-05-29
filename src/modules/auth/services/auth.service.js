@@ -101,7 +101,7 @@ export async function loginService({ correo, password }) {
       idUsuario: user.idUsuario,
       correo: user.correo,
       rol: rolCodigoFinal,
-      //rol: user.idRol
+      userRol: user.rol || 'USER',
     },
     process.env.KEY_JWT,
     { expiresIn: "7d" }
@@ -130,9 +130,11 @@ export async function loginService({ correo, password }) {
       direccion,
       tipoDocumento,
       numeroDocumento,
+      rol: user.rol, 
       rolNombre: rol.nombre,
       rolCodigo: rolCodigoFinal,
       perfilCompleto: perfilCompletoFinal,
+      rol: user.rol,
       creadoEn: user.creadoEn,
       fullName: `${user.nombres} ${user.apellidos}`.trim()
     },
@@ -492,7 +494,8 @@ export async function completeProfileService({ correo, nombres, apellidos, telef
     {
       idUsuario: user.idUsuario,
       correo: user.correo,
-      rol: rolFinal
+      rol: rolFinal,
+      userRol: user.rol || 'USER',
     },
     process.env.KEY_JWT,
     { expiresIn: "8h" }
@@ -656,7 +659,8 @@ export async function refreshTokenService({ refreshToken }) {
     {
       idUsuario: user.idUsuario,
       correo: user.correo,
-      rol: rol.codigoSistema
+      rol: rol.codigoSistema,
+      userRol: user.rol || 'USER',
     },
     process.env.KEY_JWT,
     { expiresIn: "7d" }

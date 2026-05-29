@@ -13,7 +13,6 @@ export const verifyJWT = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.KEY_JWT);
     req.user = decoded;
-    console.log('decoded', decoded)
     next();
   } catch (error) {
     console.log('error', error)

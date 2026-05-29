@@ -3,7 +3,7 @@ import { tasasCambioRepository } from '../repository/tasas-cambio.repository.js'
 import { AppError } from '../../../core/errors/app-error.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import { configTasasRepository } from '../../config-tasas/repository/config-tasas.repository.js';
 // Importar módulo CommonJS usando createRequire
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +16,12 @@ const CurrencyApi = require(path.resolve(__dirname, '../../../..', 'node_modules
 const CURRENCY_API_KEY = process.env.CURRENCY_API_KEY;
 
 // Márgenes de ganancia diferenciados
-const MARGEN_COMPRA = 0.0160; // Margen cuando nosotros COMPRAMOS USD del cliente
-const MARGEN_VENTA = 0.0155; // Margen cuando nosotros VENDEMOS USD al cliente
+//const MARGEN_COMPRA = 0.0015; // 0.15%
+//const MARGEN_VENTA  = 0.0020; // 0.25%
+
+
+
+
 
 // Validar que existe la API key
 if (!CURRENCY_API_KEY) {
@@ -63,12 +67,49 @@ export const tasasCambioService = {
 
             const tasaApi = response.rates.PEN; // Valor de 1 USD en PEN (ej: 3.76)
 
+            const config = await configTasasRepository.getConfig();
+
+if (!config) {
+    throw new AppError(
+        'No existe configuración de tasas',
+        500,
+        'CONFIG_NOT_FOUND'
+    );
+}
+
             // ============ OPERACIONES CON USD (compramos/vendemos USD) ============
             // Compramos USD del cliente (cliente VENDE USD) - Tasa más alta
-            const tasa_compra_usd = tasaApi + MARGEN_VENTA;
+        //const tasa_compra_usd = tasaApi + MARGEN_VENTA;
             
             // Vendemos USD al cliente (cliente COMPRA USD) - Tasa más baja
-            const tasa_venta_usd = tasaApi + MARGEN_COMPRA;
+            //const tasa_venta_usd = tasaApi + MARGEN_COMPRA;
+
+
+
+//const tasa_compra_usd = tasaApi * (1 - MARGEN_COMPRA);
+//const tasa_venta_usd  = tasaApi * (1 + MARGEN_VENTA);
+let tasa_compra_usd;
+let tasa_venta_usd;
+
+if (config.modo === 'MANUAL') {
+
+    tasa_compra_usd =
+        parseFloat(config.tasa_compra_usd_manual);
+
+    tasa_venta_usd =
+        parseFloat(config.tasa_venta_usd_manual);
+
+} else {
+
+tasa_compra_usd = tasaApi * (1 - parseFloat(config.margen_compra));
+tasa_venta_usd  = tasaApi * (1 + parseFloat(config.margen_venta));
+}
+
+const round = (num) => Math.round(num * 1000) / 1000;
+
+
+
+
 
             // ============ OPERACIONES CON PEN (compramos/vendemos PEN) ============
             // Compramos PEN del cliente (cliente VENDE PEN = COMPRA USD)
@@ -83,8 +124,11 @@ export const tasasCambioService = {
             const tasaData = {
                 fecha_hora: new Date(),
                 tasa_api: parseFloat(tasaApi.toFixed(4)),
-                margen_compra: MARGEN_COMPRA,
-                margen_venta: MARGEN_VENTA,
+                //margen_compra: MARGEN_COMPRA,
+                //margen_venta: MARGEN_VENTA,
+
+                margen_compra: config.margen_compra,
+                margen_venta: config.margen_venta,
                 tasa_compra_usd: parseFloat(tasa_compra_usd.toFixed(4)),
                 tasa_venta_usd: parseFloat(tasa_venta_usd.toFixed(4)),
                 tasa_compra_pen: parseFloat(tasa_compra_pen.toFixed(6)),
@@ -151,6 +195,13 @@ export const tasasCambioService = {
      * Obtiene una tasa por ID
      * Devuelve solo los campos públicos (sin tasa_api ni margen)
      */
+
+    async getTasaApiRaw() {
+    const tasa = await tasasCambioRepository.findLatest();
+    return tasa?.tasa_api ? parseFloat(tasa.tasa_api) : null;
+},
+
+
     async getTasaById(id) {
         const tasa = await tasasCambioRepository.findById(id);
         

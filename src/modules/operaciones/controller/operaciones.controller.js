@@ -34,6 +34,50 @@ export const operacionesController = {
   },
 
   // ===========================
+  // Listar todas las operaciones (admin — datos enriquecidos)
+  // ===========================
+  listAdmin: async (req, res) => {
+    try {
+      const { desde, hasta, estados } = req.query;
+      const estadosArr = estados ? estados.split(',') : undefined;
+      const operaciones = await operacionesService.getAllOperacionesAdmin({ desde, hasta, estados: estadosArr });
+      ApiResponse.success(res, 'Operaciones obtenidas', operaciones);
+    } catch (err) {
+      ApiResponse.error(res, err.message, 500);
+    }
+  },
+
+  // ===========================
+  // Estadísticas de operaciones
+  // ===========================
+  getEstadisticas: async (req, res) => {
+    try {
+      const { desde, hasta, agrupacion } = req.query;
+      const stats = await operacionesService.getEstadisticas({ desde, hasta, agrupacion });
+      ApiResponse.success(res, 'Estadísticas obtenidas', stats);
+    } catch (err) {
+      ApiResponse.error(res, err.message, 500);
+    }
+  },
+
+  // ===========================
+  // Actualizar solo el estado de una operación
+  // ===========================
+  updateEstado: async (req, res) => {
+    try {
+      const { codigoOperacion } = req.params;
+      const { estado } = req.body;
+      if (!estado) {
+        return ApiResponse.error(res, 'El estado es requerido', 400);
+      }
+      const result = await operacionesService.updateOperacionEstado(codigoOperacion, estado);
+      ApiResponse.success(res, result.message);
+    } catch (err) {
+      ApiResponse.error(res, err.message, err.status || 500);
+    }
+  },
+
+  // ===========================
   // Obtener operación por ID
   // ===========================
   getById: async (req, res) => {
@@ -74,6 +118,24 @@ export const operacionesController = {
       ApiResponse.success(res, 'Operación actualizada', operacion);
     } catch (err) {
       ApiResponse.error(res, err.message, err.status || 500);
+    }
+  },
+
+  // ===========================
+  // Exportar operaciones a Excel
+  // ===========================
+  exportExcel: async (req, res) => {
+    try {
+      const { desde, hasta, estados } = req.query;
+      const estadosArr = estados ? estados.split(',') : undefined;
+      const buffer = await operacionesService.exportExcel({ desde, hasta, estados: estadosArr });
+
+      const fecha = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=REPORTE_OPERACIONES_${fecha}.xlsx`);
+      res.send(buffer);
+    } catch (err) {
+      res.status(500).json({ message: err.message || 'Error al exportar Excel' });
     }
   },
 

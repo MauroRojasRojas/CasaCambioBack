@@ -37,8 +37,8 @@ export const updateOperacionDto = Joi.object({
   fechaEmision: Joi.date().optional().messages({
     'date.base': 'La fecha de emisión debe ser una fecha válida'
   }),
-  estado: Joi.string().valid('PENDIENTE', 'COMPLETADA', 'CANCELADA').optional().messages({
-    'any.only': 'El estado debe ser PENDIENTE, COMPLETADA o CANCELADA'
+  estado: Joi.string().valid('PENDIENTE', 'EN REVISION', 'COMPLETADO', 'TRANSFERIDO', 'OBSERVADO', 'RECHAZADO').optional().messages({
+    'any.only': 'El estado debe ser PENDIENTE, EN REVISION, COMPLETADO, TRANSFERIDO, OBSERVADO o RECHAZADO'
   }),
   tasaCompra: Joi.number().positive().precision(4).optional().messages({
     'number.base': 'La tasa de compra debe ser un número',
