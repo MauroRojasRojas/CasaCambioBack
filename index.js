@@ -50,6 +50,7 @@ app.use(
       "https://www.dollariza.pe",
       "https://dollariza.pe",
       "http://localhost:3000",
+      "https://casacambio-production.up.railway.app",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
