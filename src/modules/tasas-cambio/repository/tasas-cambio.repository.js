@@ -74,5 +74,33 @@ export const tasasCambioRepository = {
         const query = 'SELECT * FROM tasas_cambio WHERE id = ?';
         const [rows] = await pool.execute(query, [id]);
         return rows[0] || null;
+    },
+
+    // Obtener tasa API histórica (1 registro por día, el último de cada fecha)
+    async findDailyByDateRange(fechaInicio, fechaFin) {
+        const query = `
+            SELECT DATE(fecha_hora) AS fecha,
+                   tasa_api
+            FROM tasas_cambio
+            WHERE fecha_hora >= ?
+              AND fecha_hora < DATE_ADD(?, INTERVAL 1 DAY)
+              AND tasa_api IS NOT NULL
+            ORDER BY fecha_hora DESC
+        `;
+        const [rows] = await pool.execute(query, [fechaInicio, fechaFin]);
+
+        // Agrupar por fecha quedándonos con el primer registro (más reciente de ese día)
+        const seen = new Set();
+        const result = [];
+        for (const row of rows) {
+            const fechaKey = row.fecha instanceof Date
+                ? row.fecha.toISOString().split('T')[0]
+                : String(row.fecha).split(' ')[0];
+            if (!seen.has(fechaKey)) {
+                seen.add(fechaKey);
+                result.push({ fecha: fechaKey, tasa_api: parseFloat(row.tasa_api) });
+            }
+        }
+        return result.sort((a, b) => a.fecha.localeCompare(b.fecha));
     }
 };

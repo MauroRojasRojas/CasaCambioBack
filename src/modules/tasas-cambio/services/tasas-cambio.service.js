@@ -1,35 +1,7 @@
-import { createRequire } from 'module';
 import { tasasCambioRepository } from '../repository/tasas-cambio.repository.js';
 import { AppError } from '../../../core/errors/app-error.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { configTasasRepository } from '../../config-tasas/repository/config-tasas.repository.js';
-// Importar módulo CommonJS usando createRequire
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const require = createRequire(import.meta.url);
-
-// Importar directamente desde el path del paquete
-const CurrencyApi = require(path.resolve(__dirname, '../../../..', 'node_modules/currencyapi-node/src/CurrencyApi.js'));
-
-// Configuración de la API
-const CURRENCY_API_KEY = process.env.CURRENCY_API_KEY;
-
-// Márgenes de ganancia diferenciados
-//const MARGEN_COMPRA = 0.0015; // 0.15%
-//const MARGEN_VENTA  = 0.0020; // 0.25%
-
-
-
-
-
-// Validar que existe la API key
-if (!CURRENCY_API_KEY) {
-    throw new Error('CURRENCY_API_KEY no está definida en las variables de entorno');
-}
-
-// Inicializar cliente de la API
-const currencyApi = new CurrencyApi(CURRENCY_API_KEY);
+import { getExchangeRate } from '../../../core/exchange-rate/fastforex.service.js';
 
 /**
  * Formatea la respuesta eliminando campos internos (tasa_api, margen_compra, margen_venta)
@@ -37,7 +9,7 @@ const currencyApi = new CurrencyApi(CURRENCY_API_KEY);
  */
 const formatTasaResponse = (tasa) => {
     if (!tasa) return null;
-    
+
     const { tasa_api, margen_compra, margen_venta, ...tasaPublica } = tasa;
     return tasaPublica;
 };
@@ -58,75 +30,39 @@ export const tasasCambioService = {
      */
     async fetchAndSaveTasaCambio() {
         try {
-            // Consultar la API para obtener la tasa USD -> PEN
-            const response = await currencyApi.rates().base('USD').get();
-
-            if (!response || !response.rates || !response.rates.PEN) {
-                throw new AppError('Error al obtener tasa de cambio de la API', 500, 'API_ERROR');
-            }
-
-            const tasaApi = response.rates.PEN; // Valor de 1 USD en PEN (ej: 3.76)
+            const tasaApi = await getExchangeRate();
 
             const config = await configTasasRepository.getConfig();
 
-if (!config) {
-    throw new AppError(
-        'No existe configuración de tasas',
-        500,
-        'CONFIG_NOT_FOUND'
-    );
-}
+            if (!config) {
+                throw new AppError(
+                    'No existe configuración de tasas',
+                    500,
+                    'CONFIG_NOT_FOUND'
+                );
+            }
 
-            // ============ OPERACIONES CON USD (compramos/vendemos USD) ============
-            // Compramos USD del cliente (cliente VENDE USD) - Tasa más alta
-        //const tasa_compra_usd = tasaApi + MARGEN_VENTA;
-            
-            // Vendemos USD al cliente (cliente COMPRA USD) - Tasa más baja
-            //const tasa_venta_usd = tasaApi + MARGEN_COMPRA;
+            let tasa_compra_usd;
+            let tasa_venta_usd;
 
-
-
-//const tasa_compra_usd = tasaApi * (1 - MARGEN_COMPRA);
-//const tasa_venta_usd  = tasaApi * (1 + MARGEN_VENTA);
-let tasa_compra_usd;
-let tasa_venta_usd;
-
-if (config.modo === 'MANUAL') {
-
-    tasa_compra_usd =
-        parseFloat(config.tasa_compra_usd_manual);
-
-    tasa_venta_usd =
-        parseFloat(config.tasa_venta_usd_manual);
-
-} else {
-
-tasa_compra_usd = tasaApi * (1 - parseFloat(config.margen_compra));
-tasa_venta_usd  = tasaApi * (1 + parseFloat(config.margen_venta));
-}
-
-const round = (num) => Math.round(num * 1000) / 1000;
-
-
-
-
+            if (config.modo === 'MANUAL') {
+                tasa_compra_usd =
+                    parseFloat(config.tasa_compra_usd_manual);
+                tasa_venta_usd =
+                    parseFloat(config.tasa_venta_usd_manual);
+            } else {
+                tasa_compra_usd = tasaApi * (1 - parseFloat(config.margen_compra));
+                tasa_venta_usd = tasaApi * (1 + parseFloat(config.margen_venta));
+            }
 
             // ============ OPERACIONES CON PEN (compramos/vendemos PEN) ============
-            // Compramos PEN del cliente (cliente VENDE PEN = COMPRA USD)
-            // Tasa más alta en USD por PEN
             const tasa_compra_pen = 1 / tasa_venta_usd;
-            
-            // Vendemos PEN al cliente (cliente COMPRA PEN = VENDE USD)
-            // Tasa más baja en USD por PEN
             const tasa_venta_pen = 1 / tasa_compra_usd;
 
             // Guardar en base de datos
             const tasaData = {
                 fecha_hora: new Date(),
                 tasa_api: parseFloat(tasaApi.toFixed(4)),
-                //margen_compra: MARGEN_COMPRA,
-                //margen_venta: MARGEN_VENTA,
-
                 margen_compra: config.margen_compra,
                 margen_venta: config.margen_venta,
                 tasa_compra_usd: parseFloat(tasa_compra_usd.toFixed(4)),
@@ -140,7 +76,7 @@ const round = (num) => Math.round(num * 1000) / 1000;
             console.log(`✅ Tasa de cambio actualizada: 1 USD = ${tasaApi.toFixed(4)} PEN`);
             console.log(`   💵 USD: Compra=${tasa_compra_usd.toFixed(4)} PEN | Venta=${tasa_venta_usd.toFixed(4)} PEN`);
             console.log(`   💰 PEN: Compra=${tasa_compra_pen.toFixed(6)} USD | Venta=${tasa_venta_pen.toFixed(6)} USD`);
-            
+
             return {
                 id,
                 ...tasaData
@@ -158,9 +94,8 @@ const round = (num) => Math.round(num * 1000) / 1000;
      */
     async getTasaActual() {
         const tasa = await tasasCambioRepository.findLatest();
-        
+
         if (!tasa) {
-            // Si no hay tasas registradas, obtener una nueva
             console.log('No hay tasas registradas, obteniendo de la API...');
             const nuevaTasa = await this.fetchAndSaveTasaCambio();
             return formatTasaResponse(nuevaTasa);
@@ -195,16 +130,14 @@ const round = (num) => Math.round(num * 1000) / 1000;
      * Obtiene una tasa por ID
      * Devuelve solo los campos públicos (sin tasa_api ni margen)
      */
-
     async getTasaApiRaw() {
-    const tasa = await tasasCambioRepository.findLatest();
-    return tasa?.tasa_api ? parseFloat(tasa.tasa_api) : null;
-},
-
+        const tasa = await tasasCambioRepository.findLatest();
+        return tasa?.tasa_api ? parseFloat(tasa.tasa_api) : null;
+    },
 
     async getTasaById(id) {
         const tasa = await tasasCambioRepository.findById(id);
-        
+
         if (!tasa) {
             throw new AppError('Tasa de cambio no encontrada', 404, 'TASA_NOT_FOUND');
         }
@@ -214,13 +147,10 @@ const round = (num) => Math.round(num * 1000) / 1000;
 
     /**
      * Obtiene tasas históricas desde inicio de año hasta la fecha indicada
-     * Recibe parametros separados: dia, mes, ano (fecha final)
-     * Calcula automáticamente: start_date = 1 enero del año, end_date = la fecha enviada
-     * Realiza UNA SOLA llamada a timeframe endpoint con todo el rango
+     * Consulta la base de datos local (poblada cada 10 min por el cron job)
      * Devuelve sin márgenes (es historial)
      */
     async getTasasDesdeInicioAno(dia, mes, ano) {
-        // Validar que sean números válidos
         const diaNum = parseInt(dia);
         const mesNum = parseInt(mes);
         const anoNum = parseInt(ano);
@@ -233,25 +163,15 @@ const round = (num) => Math.round(num * 1000) / 1000;
             throw new AppError('Fecha inválida', 400, 'INVALID_DATE');
         }
 
-        // Crear fecha final a partir de los parámetros
         const fechaFin = new Date(anoNum, mesNum - 1, diaNum);
 
-        // Validar que la fecha sea válida
         if (isNaN(fechaFin.getTime())) {
             throw new AppError('Fecha inválida', 400, 'INVALID_DATE');
         }
 
-        // Calcular fecha de inicio: 1 de enero del año
         const año_actual = fechaFin.getFullYear();
         const fechaInicio = new Date(año_actual, 0, 1);
 
-        // Si la fecha final es hoy o futura, restar 1 día (API no devuelve datos futuros)
-        const hoy = new Date();
-        if (fechaFin >= new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())) {
-            fechaFin.setDate(fechaFin.getDate() - 1);
-        }
-
-        // Convertir a formato YYYY-MM-DD para la API
         const formatoFecha = (fecha) => {
             const y = fecha.getFullYear();
             const m = String(fecha.getMonth() + 1).padStart(2, '0');
@@ -263,41 +183,18 @@ const round = (num) => Math.round(num * 1000) / 1000;
         const fechaFinStr = formatoFecha(fechaFin);
 
         try {
-            // 1 SOLA llamada al endpoint timeframe
-            const response = await currencyApi
-                .timeframe()
-                .startDate(fechaInicioStr)
-                .endDate(fechaFinStr)
-                .base('USD')
-                .get();
+            const rows = await tasasCambioRepository.findDailyByDateRange(fechaInicioStr, fechaFinStr);
 
-            if (!response.valid) {
-                throw new AppError(`Error en API: ${response.error?.message || 'Sin datos disponibles'}`, 400, 'API_ERROR_RESPONSE');
-            }
-
-            if (!response.rates) {
-                throw new AppError(`No hay datos para el rango ${fechaInicioStr} a ${fechaFinStr}`, 404, 'NO_RATES');
-            }
-
-            // Procesar response y extraer tasas de PEN
-            const tasas = [];
-            
-            for (const [fecha, rates] of Object.entries(response.rates)) {
-                if (rates.PEN) {
-                    const tasaApi = rates.PEN;
-                    tasas.push({
-                        fecha: fecha,
-                        tasa_usd_pen: parseFloat(tasaApi.toFixed(4)),
-                        tasa_pen_usd: parseFloat((1 / tasaApi).toFixed(6))
-                    });
-                }
-            }
+            const tasas = rows.map(row => ({
+                fecha: row.fecha,
+                tasa_usd_pen: parseFloat(row.tasa_api.toFixed(4)),
+                tasa_pen_usd: parseFloat((1 / row.tasa_api).toFixed(6))
+            }));
 
             return tasas;
 
         } catch (error) {
-            if (error instanceof AppError) throw error;
-            throw new AppError(`Error al obtener tasas históricas: ${error.message}`, 500, 'TIMEFRAME_API_ERROR');
+            throw new AppError(`Error al obtener tasas históricas: ${error.message}`, 500, 'HISTORICAL_DB_ERROR');
         }
     }
 };

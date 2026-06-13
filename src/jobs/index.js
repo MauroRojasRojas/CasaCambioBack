@@ -9,8 +9,8 @@ export function initJobs() {
     await expireReservationsJob();
   });
 
-  // Cada 10 minutos: Actualizar tasa de cambio USD/PEN
-  cron.schedule("*/10 * * * *", async () => {
+  // Cada 1 minuto: Actualizar tasa de cambio USD/PEN (la API externa se actualiza cada 60s)
+  cron.schedule("*/1 * * * *", async () => {
     await actualizarTasaCambioJob();
   });
 
