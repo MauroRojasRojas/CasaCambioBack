@@ -397,6 +397,48 @@ export const operacionesService = {
   },
 
   // ===========================
+  // Actualizar tasa preferencial y recalcular monto a devolver
+  // ===========================
+  updateOperacionTasa: async (id, nuevaTasa) => {
+    try {
+      const operacion = await operacionesRepository.findById(id);
+      if (!operacion) {
+        throw new AppError('Operación no encontrada', 404, 'OPERACION_NOT_FOUND');
+      }
+
+      const decimalTasa = new Decimal(nuevaTasa);
+      let tasaCompra = operacion.tasaCompra;
+      let tasaVenta = operacion.tasaVenta;
+      let montoRecibido;
+
+      if (operacion.tipoOperacion === 'COMPRA') {
+        tasaCompra = decimalTasa.toNumber();
+        montoRecibido = new Decimal(operacion.montoEnviado).times(decimalTasa).toNumber();
+      } else {
+        tasaVenta = decimalTasa.toNumber();
+        montoRecibido = new Decimal(operacion.montoEnviado).dividedBy(decimalTasa).toNumber();
+      }
+
+      montoRecibido = Math.round(montoRecibido * 100) / 100;
+
+      const updated = await operacionesRepository.updateTasa(id, { tasaCompra, tasaVenta, montoRecibido });
+      if (!updated) {
+        throw new AppError('Error al actualizar la tasa', 500, 'UPDATE_TASA_ERROR');
+      }
+
+      return {
+        ...operacion,
+        tasaCompra,
+        tasaVenta,
+        montoRecibido,
+      };
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError('Error al actualizar la tasa', 500, 'UPDATE_TASA_ERROR');
+    }
+  },
+
+  // ===========================
   // Eliminar operación
   // ===========================
   deleteOperacion: async (id) => {

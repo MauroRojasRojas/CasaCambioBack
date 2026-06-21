@@ -16,6 +16,7 @@ router.post('/', verifyJWT, operacionesController.create);
 router.get('/', verifyJWT, requireAdmin, operacionesController.list);
 router.get('/:id', verifyJWT, operacionesController.getById);
 router.put('/:codigoOperacion/estado', verifyJWT, requireAdmin, operacionesController.updateEstado);
+router.put('/:id/tasa', verifyJWT, requireAdmin, operacionesController.updateTasa);
 router.put('/:id', verifyJWT, requireAdmin, operacionesController.update);
 router.delete('/:id', verifyJWT, requireAdmin, operacionesController.delete);
 

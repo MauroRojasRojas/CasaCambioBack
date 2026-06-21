@@ -318,6 +318,15 @@ export const operacionesRepository = {
   },
 
   // ===========================
+  // Actualizar tasa y monto recibido
+  // ===========================
+  updateTasa: async (id, { tasaCompra, tasaVenta, montoRecibido }) => {
+    const sql = `UPDATE operaciones SET tasaCompra = ?, tasaVenta = ?, montoRecibido = ? WHERE id = ?`;
+    const [result] = await pool.query(sql, [tasaCompra, tasaVenta, montoRecibido, id]);
+    return result.affectedRows > 0;
+  },
+
+  // ===========================
   // Eliminar operación
   // ===========================
   delete: async (id) => {

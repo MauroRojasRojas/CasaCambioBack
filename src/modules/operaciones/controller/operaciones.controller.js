@@ -140,6 +140,23 @@ export const operacionesController = {
   },
 
   // ===========================
+  // Actualizar tasa preferencial
+  // ===========================
+  updateTasa: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { tasa } = req.body;
+      if (!tasa || tasa <= 0) {
+        return ApiResponse.error(res, 'La tasa debe ser un número positivo', 400);
+      }
+      const result = await operacionesService.updateOperacionTasa(id, tasa);
+      ApiResponse.success(res, 'Tasa actualizada exitosamente', result);
+    } catch (err) {
+      ApiResponse.error(res, err.message, err.status || 500);
+    }
+  },
+
+  // ===========================
   // Eliminar operación
   // ===========================
   delete: async (req, res) => {
