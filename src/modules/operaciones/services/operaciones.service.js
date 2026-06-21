@@ -1,6 +1,6 @@
 import { operacionesRepository } from "../repository/operaciones.repository.js";
 import { AppError } from "../../../core/errors/app-error.js";
-import { sendOperacionConstanciaEmail } from "../../../core/mail/mail.service.js";
+import { sendOperacionConstanciaEmail, sendPagoConfirmadoEmail } from "../../../core/mail/mail.service.js";
 import Decimal from "decimal.js";
 import ExcelJS from 'exceljs';
 import path from 'path';
@@ -96,10 +96,39 @@ export const operacionesService = {
   // ===========================
   updateOperacionEstado: async (codigoOperacion, estado) => {
     try {
+      // Si el nuevo estado es TRANSFERIDO, obtenemos los datos para el correo
+      let operacionData = null;
+      if (estado === 'TRANSFERIDO') {
+        operacionData = await operacionesRepository.findByCodigoOperacion(codigoOperacion);
+      }
+
       const updated = await operacionesRepository.updateEstado(codigoOperacion, estado);
       if (!updated) {
         throw new AppError('Operación no encontrada', 404, 'OPERACION_NOT_FOUND');
       }
+
+      // Enviar correo de confirmación si se marcó como TRANSFERIDO
+      if (estado === 'TRANSFERIDO' && operacionData?.correoCliente) {
+        try {
+          await sendPagoConfirmadoEmail({
+            to: operacionData.correoCliente,
+            nombre: operacionData.nombreCliente || '',
+            codigoOperacion: operacionData.codigoOperacion,
+            fechaEmision: new Date(operacionData.fechaEmision).toLocaleString('es-PE'),
+            montoEnviado: money2(operacionData.montoEnviado),
+            monedaEnviada: operacionData.monedaEnviada,
+            montoRecibido: money2(operacionData.montoRecibido),
+            monedaRecibida: operacionData.monedaRecibida,
+            tipoOperacion: operacionData.tipoOperacion,
+            tasa: tasa6(
+              operacionData.tipoOperacion === 'COMPRA' ? operacionData.tasaCompra : operacionData.tasaVenta,
+            ),
+          });
+        } catch (emailError) {
+          console.log('⚠️ Correo de pago confirmado falló:', emailError.message);
+        }
+      }
+
       return { message: 'Estado actualizado exitosamente' };
     } catch (error) {
       if (error instanceof AppError) throw error;

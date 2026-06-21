@@ -100,6 +100,7 @@ export async function loginService({ correo, password }) {
     {
       idUsuario: user.idUsuario,
       correo: user.correo,
+      nombres: user.nombres || '',
       rol: rolCodigoFinal,
       userRol: user.rol || 'USER',
     },
@@ -494,6 +495,7 @@ export async function completeProfileService({ correo, nombres, apellidos, telef
     {
       idUsuario: user.idUsuario,
       correo: user.correo,
+      nombres: user.nombres || '',
       rol: rolFinal,
       userRol: user.rol || 'USER',
     },
@@ -659,6 +661,7 @@ export async function refreshTokenService({ refreshToken }) {
     {
       idUsuario: user.idUsuario,
       correo: user.correo,
+      nombres: user.nombres || '',
       rol: rol.codigoSistema,
       userRol: user.rol || 'USER',
     },

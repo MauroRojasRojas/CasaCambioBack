@@ -277,6 +277,38 @@ export const operacionesRepository = {
   },
 
   // ===========================
+  // Obtener operación con datos del cliente por código
+  // ===========================
+  findByCodigoOperacion: async (codigoOperacion) => {
+    const sql = `
+      SELECT
+        o.id,
+        o.personaCode,
+        o.cuentaBancariaOrigenId,
+        o.cuentaBancariaDestinoId,
+        o.montoEnviado,
+        o.monedaEnviada,
+        o.montoRecibido,
+        o.monedaRecibida,
+        o.tipoOperacion,
+        o.codigoOperacion,
+        o.fechaEmision,
+        o.estado,
+        o.tasaCompra,
+        o.tasaVenta,
+        COALESCE(CONCAT(pn.nombres, ' ', pn.apellidos), pj.razonSocial) AS cliente,
+        COALESCE(pn.correo, pj.correo) AS correoCliente,
+        COALESCE(pn.nombres, pj.razonSocial) AS nombreCliente
+      FROM operaciones o
+      LEFT JOIN personas_juridicas pj ON pj.codigo = o.personaCode
+      LEFT JOIN personas_naturales pn ON pn.codigo = o.personaCode
+      WHERE o.codigoOperacion = ?
+    `;
+    const [rows] = await pool.query(sql, [codigoOperacion]);
+    return rows[0] || null;
+  },
+
+  // ===========================
   // Actualizar solo el estado
   // ===========================
   updateEstado: async (codigoOperacion, estado) => {

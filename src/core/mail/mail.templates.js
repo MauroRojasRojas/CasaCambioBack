@@ -427,6 +427,211 @@ export const welcomeTemplate = ({
   </div>
 `;
 
+export const pagoConfirmadoTemplate = ({
+  nombre = "",
+  codigoOperacion = "",
+  fechaEmision = "",
+  montoEnviado = "",
+  monedaEnviada = "",
+  montoRecibido = "",
+  monedaRecibida = "",
+  tipoOperacion = "",
+  tasa = "",
+  panelUrl = "https://dollariza.pe/login",
+  frontUrl = "https://dollariza.pe",
+  soporteEmail = "info.dollariza@gmail.com",
+  soportePhone = "956-767-180",
+}) => `
+  <div style="margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F8FAFC;padding:32px 0;">
+      <tr>
+        <td align="center" style="padding:0 16px;">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#FFFFFF;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(15,23,42,0.08);">
+
+            <!-- ===================== HEADER ===================== -->
+            <tr>
+              <td style="background:linear-gradient(90deg,#0B1220 0%,#102A56 35%,#123B82 100%);padding:16px 24px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="vertical-align:middle;">
+                      <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%;">
+                        <tr>
+                          <td style="vertical-align:middle;padding-right:14px;white-space:nowrap;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" style="background:#FFFFFF;border-radius:14px;padding:8px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">
+                              <tr>
+                                <td style="text-align:center;">
+                                  <img src="${frontUrl}/icons/logomejorado.png" alt="Dollariza" style="width:44px;height:44px;display:block;border-radius:8px;" />
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                          <td style="vertical-align:middle;width:100%;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                              <tr>
+                                <td style="font-size:24px;font-weight:800;color:#FFFFFF;font-family:Arial,sans-serif;letter-spacing:0.2px;line-height:1.2;">Dollariza</td>
+                              </tr>
+                              <tr>
+                                <td style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.85);font-family:Arial,sans-serif;padding-top:1px;">Plataforma segura de cambio online</td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ===================== SUCCESS CARD ===================== -->
+            <tr>
+              <td style="padding:32px 28px 0 28px;background:#FFFFFF;">
+                <div style="background:linear-gradient(135deg,#052E16 0%,#065F46 50%,#064E3B 100%);border-radius:24px;padding:36px 28px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.12);">
+                  
+                  <!-- Icon circle -->
+                  <div style="width:80px;height:80px;border-radius:50%;background:#16A34A;margin:0 auto 20px auto;font-size:44px;font-weight:bold;color:#ffffff;line-height:80px;text-align:center;box-shadow:0 0 30px rgba(22,163,74,0.4);">
+                    &#10003;
+                  </div>
+
+                  <!-- Title -->
+                  <div style="font-family:Arial,sans-serif;color:#FFFFFF;">
+                    <div style="font-size:42px;font-weight:800;letter-spacing:-0.5px;line-height:1.1;margin-bottom:16px;">
+                      &iexcl;Tu pago fue realizado!
+                    </div>
+                    <div style="width:60px;height:4px;background:rgba(22,163,74,0.5);border-radius:2px;margin:0 auto 20px auto;"></div>
+                    <div style="font-size:16px;font-weight:400;line-height:1.65;color:rgba(255,255,255,0.9);">
+                      Hola${nombre ? ` <span style="color:#A3E635;font-weight:700;">${nombre}</span>,` : ""} nos complace informarte que tu operaci&oacute;n
+                      ha sido <span style="color:#A3E635;font-weight:700;">transferida exitosamente</span>. El monto ya est&aacute; disponible.
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ===================== DETAIL CARD ===================== -->
+            <tr>
+              <td style="padding:28px 28px 0 28px;background:#FFFFFF;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:28px;border:1px solid #E2E8F0;border-radius:20px;background:#FFFFFF;box-shadow:0 10px 25px rgba(15,23,42,0.06);">
+                      <div style="font-family:Arial,sans-serif;color:#0F172A;">
+                        
+                        <!-- Header with icon -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
+                          <tr>
+                            <td style="vertical-align:middle;padding-right:14px;">
+                              <div style="width:44px;height:44px;border-radius:12px;background:#DBEAFE;font-size:24px;font-weight:bold;color:#1D4ED8;line-height:44px;text-align:center;">
+                                &#10003;
+                              </div>
+                            </td>
+                            <td style="vertical-align:middle;">
+                              <div style="font-size:30px;font-weight:700;color:#0F172A;letter-spacing:-0.3px;">Detalle de la operaci&oacute;n</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Data rows -->
+                        <table style="width:100%;font-size:15px;color:#0F172A;line-height:1.9;border-collapse:collapse;">
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;width:45%;">Cliente</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${nombre || ""}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;">C&oacute;digo</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${codigoOperacion}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;">Tipo</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${tipoOperacion}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;">Tasa de cambio</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${tasa}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;">T&uacute; enviaste</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${montoEnviado} ${monedaEnviada}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:12px 0;color:#64748B;">Recibiste</td>
+                            <td style="padding:12px 0;font-weight:800;text-align:right;color:#16A34A;font-size:20px;">${montoRecibido} ${monedaRecibida}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-top:1px solid #F1F5F9;">Fecha</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-top:1px solid #F1F5F9;">${fechaEmision}</td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- ===================== BOTONES ===================== -->
+            <tr>
+              <td style="padding:28px 28px 0 28px;background:#FFFFFF;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="width:50%;padding-right:10px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td style="border-radius:16px;background:linear-gradient(90deg,#123B82,#1D4ED8);text-align:center;height:60px;">
+                            <a href="${panelUrl}" style="display:block;line-height:60px;padding:0 20px;color:#FFFFFF;text-decoration:none;font-family:Arial,sans-serif;font-size:16px;font-weight:700;letter-spacing:0.2px;border-radius:16px;">
+                              Ir a mi panel
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td style="width:50%;padding-left:10px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td style="border-radius:16px;background:#FFFFFF;border:2px solid #1D4ED8;text-align:center;height:60px;">
+                            <a href="${frontUrl}" style="display:block;line-height:60px;padding:0 20px;color:#1D4ED8;text-decoration:none;font-family:Arial,sans-serif;font-size:16px;font-weight:700;letter-spacing:0.2px;border-radius:16px;">
+                              Ver historial
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- ===================== TIP ===================== -->
+            <tr>
+              <td style="padding:20px 28px 0 28px;background:#FFFFFF;">
+                <div style="font-family:Arial,sans-serif;font-size:13px;color:#64748B;line-height:1.6;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;padding:16px 18px;">
+                  💡 Puedes revisar el detalle de todas tus operaciones en la secci&oacute;n
+                  <span style="color:#0F172A;font-weight:600;">Historial de operaciones</span> de tu panel.
+                </div>
+              </td>
+            </tr>
+
+            <!-- ===================== FOOTER ===================== -->
+            <tr>
+              <td style="padding:28px 28px 32px 28px;background:#FFFFFF;">
+                <div style="border-top:1px solid #E2E8F0;padding-top:20px;font-family:Arial,sans-serif;">
+                  <div style="font-size:14px;color:#0F172A;font-weight:700;margin-bottom:8px;">&iquest;Necesitas ayuda?</div>
+                  <div style="font-size:14px;color:#64748B;line-height:1.8;">
+                    Escr&iacute;benos a <a href="mailto:${soporteEmail}" style="color:#1D4ED8;text-decoration:underline;font-weight:600;">${soporteEmail}</a>
+                    o cont&aacute;ctanos al <a href="tel:${soportePhone}" style="color:#1D4ED8;text-decoration:underline;font-weight:600;">${soportePhone}</a>.
+                  </div>
+                  <div style="margin-top:14px;font-size:12px;color:#94A3B8;">
+                    &copy; ${new Date().getFullYear()} Dollariza &mdash; Todos los derechos reservados.
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+`;
+
 export const operacionConstanciaTemplate = ({
   nombre,
   codigoOperacion,
@@ -438,55 +643,189 @@ export const operacionConstanciaTemplate = ({
   tipoOperacion,
   tasa,
   soporteEmail = "info.dollariza@gmail.com",
+  soportePhone = "956-767-180",
   minutos = 20,
   loginUrl,
+  frontUrl = "https://dollariza.pe",
 }) => `
-  <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
-    <h2 style="margin:0 0 8px">CONSTANCIA DE PAGO</h2>
-    <p style="margin:0 0 16px;color:#475569">
-      ${fechaEmision} &nbsp; | &nbsp; <b>Código:</b> ${codigoOperacion}
-    </p>
+  <div style="margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F8FAFC;padding:32px 0;">
+      <tr>
+        <td align="center" style="padding:0 16px;">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#FFFFFF;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(15,23,42,0.08);">
 
-    <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0" />
+            <!-- ===================== HEADER ===================== -->
+            <tr>
+              <td style="background:linear-gradient(90deg,#0B1220 0%,#102A56 35%,#123B82 100%);padding:16px 24px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="vertical-align:middle;">
+                      <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%;">
+                        <tr>
+                          <td style="vertical-align:middle;padding-right:14px;white-space:nowrap;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" style="background:#FFFFFF;border-radius:14px;padding:8px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">
+                              <tr>
+                                <td style="text-align:center;">
+                                  <img src="${frontUrl}/icons/logomejorado.png" alt="Dollariza" style="width:44px;height:44px;display:block;border-radius:8px;" />
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                          <td style="vertical-align:middle;width:100%;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                              <tr>
+                                <td style="font-size:24px;font-weight:800;color:#FFFFFF;font-family:Arial,sans-serif;letter-spacing:0.2px;line-height:1.2;">Dollariza</td>
+                              </tr>
+                              <tr>
+                                <td style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.85);font-family:Arial,sans-serif;padding-top:1px;">Plataforma segura de cambio online</td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ===================== INFO BANNER ===================== -->
+            <tr>
+              <td style="padding:32px 28px 0 28px;background:#FFFFFF;">
+                <div style="background:linear-gradient(135deg,#0C1F3F 0%,#0F3D91 50%,#1A4CB5 100%);border-radius:24px;padding:32px 24px;text-align:center;box-shadow:0 20px 40px rgba(15,61,145,0.12);">
+                  <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.15);margin:0 auto 16px auto;font-size:32px;font-weight:bold;color:#ffffff;line-height:64px;text-align:center;">
+                    &#9998;
+                  </div>
+                  <div style="font-family:Arial,sans-serif;color:#FFFFFF;">
+                    <div style="font-size:32px;font-weight:800;letter-spacing:-0.3px;line-height:1.15;margin-bottom:8px;">
+                      Constancia de operaci&oacute;n
+                    </div>
+                    <div style="width:50px;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 14px auto;"></div>
+                    <div style="font-size:15px;font-weight:400;line-height:1.6;color:rgba(255,255,255,0.85);">
+                      ${nombre ? `<span style="color:#93C5FD;font-weight:700;">${nombre}</span> &middot; ` : ""}${fechaEmision} &nbsp;|&nbsp; C&oacute;digo: <span style="font-weight:700;">${codigoOperacion}</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-    <p style="margin:0 0 8px"><b>Cliente:</b> ${nombre || ""}</p>
-    <p style="margin:0 0 8px">Operación: <b>${tipoOperacion}</b> &nbsp; | &nbsp; Tasa usada: <b>${tasa}</b></p>
+            <!-- ===================== DETAIL CARD ===================== -->
+            <tr>
+              <td style="padding:28px 28px 0 28px;background:#FFFFFF;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:28px;border:1px solid #E2E8F0;border-radius:20px;background:#FFFFFF;box-shadow:0 10px 25px rgba(15,23,42,0.06);">
+                      <div style="font-family:Arial,sans-serif;color:#0F172A;">
+                        
+                        <!-- Header with icon -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
+                          <tr>
+                            <td style="vertical-align:middle;padding-right:14px;">
+                              <div style="width:44px;height:44px;border-radius:12px;background:#DBEAFE;font-size:24px;font-weight:bold;color:#1D4ED8;line-height:44px;text-align:center;">
+                                &#10003;
+                              </div>
+                            </td>
+                            <td style="vertical-align:middle;">
+                              <div style="font-size:30px;font-weight:700;color:#0F172A;letter-spacing:-0.3px;">Detalle de la operaci&oacute;n</div>
+                            </td>
+                          </tr>
+                        </table>
 
-    <p style="margin:0 0 8px">Enviarás: <b>${montoEnviado} ${monedaEnviada}</b></p>
-    <p style="margin:0 0 8px">Recibirás: <b>${montoRecibido} ${monedaRecibida}</b></p>
+                        <!-- Data rows -->
+                        <table style="width:100%;font-size:15px;color:#0F172A;line-height:1.9;border-collapse:collapse;">
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;width:45%;">Cliente</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${nombre || ""}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;">Tipo</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${tipoOperacion}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;">Tasa de cambio</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${tasa}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0;color:#64748B;border-bottom:1px solid #F1F5F9;">Env&iacute;as</td>
+                            <td style="padding:10px 0;font-weight:700;text-align:right;border-bottom:1px solid #F1F5F9;">${montoEnviado} ${monedaEnviada}</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:12px 0;color:#64748B;">Recibes</td>
+                            <td style="padding:12px 0;font-weight:800;text-align:right;color:#1D4ED8;font-size:20px;">${montoRecibido} ${monedaRecibida}</td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
 
-    <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0" />
+            <!-- ===================== INSTRUCTIONS ===================== -->
+            <tr>
+              <td style="padding:20px 28px 0 28px;background:#FFFFFF;">
+                <div style="font-family:Arial,sans-serif;font-size:13px;color:#64748B;line-height:1.7;background:#FFFBEB;border:1px solid #FDE68A;border-radius:14px;padding:18px;">
+                  <div style="font-weight:700;color:#0F172A;margin-bottom:6px;font-size:14px;">📋 Instrucciones de env&iacute;o</div>
+                  Env&iacute;a esta constancia al correo <b style="color:#0F172A;">${soporteEmail}</b> dentro de los pr&oacute;ximos <b style="color:#0F172A;">${minutos} minutos</b>
+                  junto con el comprobante de tu transferencia. Incluye todos los detalles de la operaci&oacute;n para una verificaci&oacute;n r&aacute;pida y eficiente.
+                  <br/><br/>
+                  Esta constancia es v&aacute;lida &uacute;nicamente si se valida de manera correcta el comprobante enviado por correo electr&oacute;nico.
+                  De lo contrario, quedar&aacute; anulada y no proceder&aacute; la transacci&oacute;n.
+                </div>
+              </td>
+            </tr>
 
-    <h3 style="margin:0 0 8px">Instrucciones de envío</h3>
-    <p style="margin:0 0 10px">
-      Envíe esta constancia al correo <b>${soporteEmail}</b> dentro de los próximos <b>${minutos} minutos</b>
-      junto con el comprobante de su transferencia. Incluya todos los detalles de la operación para una verificación rápida y eficiente.
-    </p>
+            <!-- ===================== BOTONES ===================== -->
+            <tr>
+              <td style="padding:28px 28px 0 28px;background:#FFFFFF;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="width:50%;padding-right:10px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td style="border-radius:16px;background:linear-gradient(90deg,#123B82,#1D4ED8);text-align:center;height:60px;">
+                            <a href="${loginUrl || `${frontUrl}/login`}" style="display:block;line-height:60px;padding:0 20px;color:#FFFFFF;text-decoration:none;font-family:Arial,sans-serif;font-size:16px;font-weight:700;letter-spacing:0.2px;border-radius:16px;">
+                              Ir a mi panel
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td style="width:50%;padding-left:10px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td style="border-radius:16px;background:#FFFFFF;border:2px solid #1D4ED8;text-align:center;height:60px;">
+                            <a href="${frontUrl}" style="display:block;line-height:60px;padding:0 20px;color:#1D4ED8;text-decoration:none;font-family:Arial,sans-serif;font-size:16px;font-weight:700;letter-spacing:0.2px;border-radius:16px;">
+                              Ver historial
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
 
-    <p style="margin:0 0 10px;color:#334155">
-      Esta constancia es válida únicamente si se valida de manera correcta el comprobante enviado por correo electrónico.
-      De lo contrario, quedará anulada y no procederá la transacción.
-    </p>
+            <!-- ===================== FOOTER ===================== -->
+            <tr>
+              <td style="padding:28px 28px 32px 28px;background:#FFFFFF;">
+                <div style="border-top:1px solid #E2E8F0;padding-top:20px;font-family:Arial,sans-serif;">
+                  <div style="font-size:14px;color:#0F172A;font-weight:700;margin-bottom:8px;">&iquest;Necesitas ayuda?</div>
+                  <div style="font-size:14px;color:#64748B;line-height:1.8;">
+                    Escr&iacute;benos a <a href="mailto:${soporteEmail}" style="color:#1D4ED8;text-decoration:underline;font-weight:600;">${soporteEmail}</a>
+                    o cont&aacute;ctanos al <a href="tel:${soportePhone}" style="color:#1D4ED8;text-decoration:underline;font-weight:600;">${soportePhone}</a>.
+                  </div>
+                  <div style="margin-top:14px;font-size:12px;color:#94A3B8;">
+                    &copy; ${new Date().getFullYear()} Dollariza &mdash; Todos los derechos reservados.
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-    <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0" />
-
-    <p style="margin:0 0 10px">
-      Para ver más detalles y descargar el PDF, inicie sesión y vaya a <b>Historial de operaciones</b>.
-    </p>
-
-    ${
-      loginUrl
-        ? `<p style="margin:10px 0 0">
-            <a href="${loginUrl}" style="display:inline-block;padding:10px 14px;background:#0b1b33;color:#fff;border-radius:10px;text-decoration:none">
-              Iniciar sesión
-            </a>
-          </p>`
-        : ""
-    }
-
-    <p style="margin:16px 0 0;color:#64748b;font-size:12px">
-      Si usted no realizó esta operación, ignore este mensaje.
-    </p>
+          </table>
+        </td>
+      </tr>
+    </table>
   </div>
 `;
 

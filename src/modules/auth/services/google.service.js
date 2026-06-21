@@ -42,8 +42,8 @@ export async function googleRegisterService({ idToken }) {
         {
           idUsuario: user.idUsuario,
           correo: user.correo,
+          nombres: user.nombres || '',
           rol: rol.codigoSistema,
-          //rol: user.idRol
         },
         process.env.KEY_JWT,
         { expiresIn: "15m" }
@@ -148,6 +148,7 @@ export async function googleLoginService({ idToken }) {
         {
           idUsuario: user.idUsuario,
           correo: user.correo,
+          nombres: user.nombres || '',
           rol: rol.codigoSistema
         },
         process.env.KEY_JWT,

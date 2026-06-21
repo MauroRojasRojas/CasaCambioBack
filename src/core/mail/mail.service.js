@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { AppError } from "../errors/app-error.js"
-import { adminReservaEnRevisionTemplate, complaintTemplate, contactUsTemplate, operacionConstanciaTemplate, otpTemplate, preReservaTemplate, recoveryTemplate, reservaConfirmadaTemplate, welcomeTemplate } from "./mail.templates.js";
+import { adminReservaEnRevisionTemplate, complaintTemplate, contactUsTemplate, operacionConstanciaTemplate, otpTemplate, pagoConfirmadoTemplate, preReservaTemplate, recoveryTemplate, reservaConfirmadaTemplate, welcomeTemplate } from "./mail.templates.js";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -174,9 +174,29 @@ export async function sendWelcomeEmail({ to, nombre }) {
   }
 }
 
+export async function sendPagoConfirmadoEmail(payload) {
+  try {
+    const panelUrl = `${process.env.FRONT_URL}/login`;
+    const frontUrl = process.env.FRONT_URL;
+
+    await resend.emails.send({
+      from: process.env.MAIL_FROM,
+      to: payload.to,
+      subject: `¡Pago realizado! - ${payload.codigoOperacion}`,
+      html: pagoConfirmadoTemplate({ ...payload, panelUrl, frontUrl }),
+    });
+
+    console.log(`✅ Correo de pago confirmado enviado a ${payload.to}`);
+  } catch (error) {
+    console.error("RESEND ERROR (PAGO CONFIRMADO):", error);
+    throw new AppError("Error al enviar correo de confirmación de pago", 500, "MAIL_SEND_FAILED");
+  }
+}
+
 export async function sendOperacionConstanciaEmail(payload) {
   try {
-    const loginUrl = `${process.env.FRONT_URL}/login`; // ajusta ruta real
+    const loginUrl = `${process.env.FRONT_URL}/login`;
+    const frontUrl = process.env.FRONT_URL;
 
     console.log('payload',payload)
   
@@ -184,7 +204,7 @@ export async function sendOperacionConstanciaEmail(payload) {
       from: process.env.MAIL_FROM,
       to: payload.to,
       subject: `Constancia de operación - ${payload.codigoOperacion}`,
-      html: operacionConstanciaTemplate({ ...payload, loginUrl }),
+      html: operacionConstanciaTemplate({ ...payload, loginUrl, frontUrl }),
     });
     console.log('resett',reset)
 
