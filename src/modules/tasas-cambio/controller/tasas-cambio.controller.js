@@ -94,5 +94,14 @@ async getTasaApi(req, res, next) {
     } catch (error) {
         next(error);
     }
+},
+
+async getTasaRecomendada(req, res, next) {
+    try {
+        const tasa = await tasasCambioService.getTasaRecomendada();
+        return ApiResponse.success(res, tasa, 'Tasa recomendada obtenida exitosamente');
+    } catch (error) {
+        next(error);
+    }
 }
 };

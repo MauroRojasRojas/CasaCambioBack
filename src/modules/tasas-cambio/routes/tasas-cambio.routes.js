@@ -9,6 +9,7 @@ const router = Router();
  */
 router.get('/actual', tasasCambioController.getTasaActual);
 router.get('/tasa-api', tasasCambioController.getTasaApi);
+router.get('/tasa-recomendada', tasasCambioController.getTasaRecomendada);
 /**
  * GET /api/tasas-cambio/historico
  * Obtiene el histórico de tasas de cambio

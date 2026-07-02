@@ -2,6 +2,7 @@ import { tasasCambioRepository } from '../repository/tasas-cambio.repository.js'
 import { AppError } from '../../../core/errors/app-error.js';
 import { configTasasRepository } from '../../config-tasas/repository/config-tasas.repository.js';
 import { getExchangeRate } from '../../../core/exchange-rate/fastforex.service.js';
+import { getRecomendedRate } from '../../../core/exchange-rate/marr-api.service.js';
 
 /**
  * Formatea la respuesta eliminando campos internos (tasa_api, margen_compra, margen_venta)
@@ -44,12 +45,19 @@ export const tasasCambioService = {
 
             let tasa_compra_usd;
             let tasa_venta_usd;
+            let tasaApiFinal = tasaApi;
 
             if (config.modo === 'MANUAL') {
                 tasa_compra_usd =
                     parseFloat(config.tasa_compra_usd_manual);
                 tasa_venta_usd =
                     parseFloat(config.tasa_venta_usd_manual);
+                tasaApiFinal = (tasa_compra_usd + tasa_venta_usd) / 2;
+            } else if (config.modo === 'RECOMENDADO') {
+                const recomendado = await getRecomendedRate();
+                tasa_compra_usd = recomendado.buy * (1 - parseFloat(config.margen_compra));
+                tasa_venta_usd = recomendado.sale * (1 + parseFloat(config.margen_venta));
+                tasaApiFinal = recomendado.referenceAvg;
             } else {
                 tasa_compra_usd = tasaApi * (1 - parseFloat(config.margen_compra));
                 tasa_venta_usd = tasaApi * (1 + parseFloat(config.margen_venta));
@@ -62,7 +70,7 @@ export const tasasCambioService = {
             // Guardar en base de datos
             const tasaData = {
                 fecha_hora: new Date(),
-                tasa_api: parseFloat(tasaApi.toFixed(4)),
+                tasa_api: parseFloat(tasaApiFinal.toFixed(4)),
                 margen_compra: config.margen_compra,
                 margen_venta: config.margen_venta,
                 tasa_compra_usd: parseFloat(tasa_compra_usd.toFixed(4)),
@@ -73,7 +81,7 @@ export const tasasCambioService = {
 
             const id = await tasasCambioRepository.create(tasaData);
 
-            console.log(`✅ Tasa de cambio actualizada: 1 USD = ${tasaApi.toFixed(4)} PEN`);
+            console.log(`✅ Tasa de cambio actualizada: 1 USD = ${tasaApiFinal.toFixed(4)} PEN (modo: ${config.modo})`);
             console.log(`   💵 USD: Compra=${tasa_compra_usd.toFixed(4)} PEN | Venta=${tasa_venta_usd.toFixed(4)} PEN`);
             console.log(`   💰 PEN: Compra=${tasa_compra_pen.toFixed(6)} USD | Venta=${tasa_venta_pen.toFixed(6)} USD`);
 
@@ -85,6 +93,19 @@ export const tasasCambioService = {
         } catch (error) {
             console.error('❌ Error al obtener y guardar tasa de cambio:', error);
             throw error;
+        }
+    },
+
+    /**
+     * Obtiene las tasas recomendadas directamente de la API MARR
+     */
+    async getTasaRecomendada() {
+        try {
+            const recomendado = await getRecomendedRate();
+            return recomendado;
+        } catch (error) {
+            console.error('❌ Error al obtener tasa recomendada:', error.message);
+            return null;
         }
     },
 

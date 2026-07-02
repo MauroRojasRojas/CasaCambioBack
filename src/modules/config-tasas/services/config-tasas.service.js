@@ -16,14 +16,14 @@ export const configTasasService = {
         const { modo, margen_compra, margen_venta, tasa_compra_usd_manual, tasa_venta_usd_manual } = body;
 
         // --- Validaciones ---
-        if (!['AUTO', 'MANUAL'].includes(modo)) {
-            throw new AppError('modo debe ser AUTO o MANUAL', 400, 'INVALID_MODO');
+        if (!['AUTO', 'MANUAL', 'RECOMENDADO'].includes(modo)) {
+            throw new AppError('modo debe ser AUTO, MANUAL o RECOMENDADO', 400, 'INVALID_MODO');
         }
 
-        if (modo === 'AUTO') {
+        if (modo === 'AUTO' || modo === 'RECOMENDADO') {
             // En modo AUTO se requieren los márgenes
             if (margen_compra == null || margen_venta == null) {
-                throw new AppError('margen_compra y margen_venta son requeridos en modo API', 400, 'MISSING_MARGENES');
+                throw new AppError('margen_compra y margen_venta son requeridos en modo AUTO/RECOMENDADO', 400, 'MISSING_MARGENES');
             }
             if (margen_compra < 0 || margen_compra > 0.10) {
                 throw new AppError('margen_compra debe estar entre 0 y 0.10 (10%)', 400, 'INVALID_MARGEN');
@@ -50,8 +50,8 @@ export const configTasasService = {
 
         const updated = await configTasasRepository.updateConfig({
             modo,
-            margen_compra:          modo === 'AUTO' ? parseFloat(margen_compra) : null,
-            margen_venta:           modo === 'AUTO' ? parseFloat(margen_venta)  : null,
+            margen_compra:          (modo === 'AUTO' || modo === 'RECOMENDADO') ? parseFloat(margen_compra) : null,
+            margen_venta:           (modo === 'AUTO' || modo === 'RECOMENDADO') ? parseFloat(margen_venta)  : null,
             tasa_compra_usd_manual: modo === 'MANUAL' ? parseFloat(tasa_compra_usd_manual) : null,
             tasa_venta_usd_manual:  modo === 'MANUAL' ? parseFloat(tasa_venta_usd_manual)  : null,
             
